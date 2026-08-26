@@ -1,0 +1,13 @@
+infra-images.tar
+*.tar
+build/
+target/
+out/
+node_modules/
+.gradle/
+.idea/
+.vscode/
+.DS_Store
+*.log
+.omc/
+*.zip
