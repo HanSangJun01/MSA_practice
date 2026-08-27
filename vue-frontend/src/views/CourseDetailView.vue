@@ -40,7 +40,7 @@
           <!-- 우측 결제/수강 카드 -->
           <div class="enroll-card fade-in">
             <div class="enroll-thumb thumb-industrial">
-              <MaterialIcon :category="course.category" class="thumb-icon" />
+              <img v-if="categoryImage" :src="categoryImage" :alt="displayCategory" class="thumb-photo" />
             </div>
 
             <div class="enroll-body">
@@ -107,7 +107,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppHeader from '@/components/AppHeader.vue'
-import MaterialIcon from '@/components/MaterialIcon.vue'
+import { getCategoryImage } from '@/constants/categoryImage.js'
 import { useCourseStore } from '@/store/course.js'
 import { enrollmentApi } from '@/api/enrollment.js'
 import { courseApi } from '@/api/course.js'
@@ -137,6 +137,7 @@ const isSupplier = computed(() => auth.user?.companyType === 'SUPPLIER')
 const isIntermediary = computed(() => auth.user?.companyType === 'INTERMEDIARY')
 
 const displayCategory = computed(() => getCategoryLabel(course.value?.category) || '-')
+const categoryImage = computed(() => getCategoryImage(course.value?.category))
 
 const displayInstructorName = computed(() => {
   return (
@@ -450,9 +451,10 @@ watch(
   height: 190px;
 }
 
-.thumb-icon {
-  width: 64px;
-  height: 64px;
+.thumb-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .enroll-body {

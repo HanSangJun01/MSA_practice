@@ -2,7 +2,7 @@
   <router-link :to="`/courses/${course.id}`" class="course-card">
     <!-- 썸네일 -->
     <div class="card-thumb thumb-industrial">
-      <MaterialIcon :category="course.category" class="thumb-icon" />
+      <img v-if="categoryImage" :src="categoryImage" :alt="categoryLabel" class="thumb-photo" />
     </div>
 
     <!-- 내용 -->
@@ -27,8 +27,8 @@
 
 <script setup>
 import { computed } from 'vue'
-import MaterialIcon from '@/components/MaterialIcon.vue'
 import { getCategoryLabel } from '@/constants/category.js'
+import { getCategoryImage } from '@/constants/categoryImage.js'
 import { getLotStatusLabel, getLotStatusBadge } from '@/constants/lotStatus.js'
 
 const props = defineProps({
@@ -36,6 +36,7 @@ const props = defineProps({
 })
 
 const categoryLabel = computed(() => getCategoryLabel(props.course.category))
+const categoryImage = computed(() => getCategoryImage(props.course.category))
 const statusLabel = computed(() => getLotStatusLabel(props.course.status))
 const statusBadgeClass = computed(() => getLotStatusBadge(props.course.status))
 </script>
@@ -59,9 +60,10 @@ const statusBadgeClass = computed(() => getLotStatusBadge(props.course.status))
 .card-thumb {
   height: 168px;
 }
-.thumb-icon {
-  width: 56px;
-  height: 56px;
+.thumb-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .card-body {
   padding: 18px 20px 20px;

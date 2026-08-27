@@ -44,7 +44,12 @@
         <div v-else-if="enrollments.length" class="enrollment-list fade-in">
           <div v-for="item in enrollments" :key="item.id" class="enrollment-card">
             <div class="enroll-thumb thumb-industrial">
-              <MaterialIcon :category="materialOf(item).category" class="thumb-icon" />
+              <img
+                v-if="getCategoryImage(materialOf(item).category)"
+                :src="getCategoryImage(materialOf(item).category)"
+                :alt="getCategoryLabel(materialOf(item).category)"
+                class="thumb-photo"
+              />
             </div>
 
             <div class="enroll-info">
@@ -92,10 +97,10 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import AppHeader from '@/components/AppHeader.vue'
-import MaterialIcon from '@/components/MaterialIcon.vue'
 import { enrollmentApi } from '@/api/enrollment.js'
 import { useAuthStore } from '@/store/auth.js'
 import { getCategoryLabel } from '@/constants/category.js'
+import { getCategoryImage } from '@/constants/categoryImage.js'
 
 // material 필드가 없으면 예전 course 필드로 폴백한다
 function materialOf(item) {
@@ -261,9 +266,10 @@ onMounted(async () => {
   overflow: hidden;
 }
 
-.thumb-icon {
-  width: 32px;
-  height: 32px;
+.thumb-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .enroll-info {
