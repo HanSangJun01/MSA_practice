@@ -12,7 +12,7 @@
             class="sidebar-item"
             :class="{ active: $route.path === '/courses' }"
           >
-            <span class="si-icon">📚</span> 강의 목록
+            <span class="si-icon">📚</span> 원료 목록
           </router-link>
 
           <router-link
@@ -20,7 +20,7 @@
             to="/enrollments"
             class="sidebar-item"
           >
-            <span class="si-icon">✅</span> 내 수강 목록
+            <span class="si-icon">✅</span> 내 구매 목록
           </router-link>
 
           <router-link
@@ -46,9 +46,9 @@
       <main class="main-content">
         <div class="content-header">
           <div>
-            <h1 class="page-title">강의 목록</h1>
+            <h1 class="page-title">원료 목록</h1>
             <p class="page-subtitle" v-if="isInstructor">
-              강사 계정으로 등록된 강의를 확인하고 새 강의를 추가할 수 있습니다.
+              공급기업 계정으로 등록한 원료를 확인하고 새 원료를 추가할 수 있습니다.
             </p>
           </div>
 
@@ -57,7 +57,7 @@
             to="/courses/new"
             class="btn btn-primary create-course-btn"
           >
-            강의 등록
+            원료 등록
           </router-link>
         </div>
 
@@ -85,7 +85,7 @@
           </div>
         </div>
 
-        <!-- 강의 그리드 -->
+        <!-- 원료 그리드 -->
         <div v-else-if="filteredCourses.length" class="course-grid fade-in">
           <CourseCard
             v-for="course in filteredCourses"
@@ -96,14 +96,14 @@
 
         <!-- 빈 상태 -->
         <div v-else class="empty-state">
-          <p>해당 카테고리의 강의가 없습니다.</p>
+          <p>해당 카테고리의 원료가 없습니다.</p>
 
           <router-link
             v-if="isInstructor"
             to="/courses/new"
             class="btn btn-primary empty-action-btn"
           >
-            첫 강의 등록하기
+            첫 원료 등록하기
           </router-link>
         </div>
       </main>
@@ -210,8 +210,8 @@ onMounted(() => {
 }
 
 .sidebar-item.active {
-  background: var(--color-primary-light);
-  color: var(--color-primary);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
   font-weight: 500;
 }
 

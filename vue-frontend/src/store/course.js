@@ -9,18 +9,19 @@ export const useCourseStore = defineStore('course', () => {
   const error = ref(null)
   const selectedCategory = ref('전체')
 
-  const categories = ['전체', '백엔드', '프론트엔드', 'DevOps', '데이터', 'AI']
+  const categories = ['전체', '폐건전지', '폐수슬러지', '제철슬래그', '폐합성수지', '스크랩금속', '식품부산물']
 
   // 백엔드 카테고리 → 프론트 표시용 카테고리
   const categoryLabelMap = {
-    BACKEND: '백엔드',
-    FRONTEND: '프론트엔드',
-    DEVOPS: 'DevOps',
-    DATA: '데이터',
-    AI: 'AI'
+    WASTE_BATTERY: '폐건전지',
+    WASTEWATER_SLUDGE: '폐수슬러지',
+    STEEL_SLAG: '제철슬래그',
+    WASTE_PLASTIC: '폐합성수지',
+    SCRAP_METAL: '스크랩금속',
+    FOOD_BYPRODUCT: '식품부산물'
   }
 
-  // 썸네일 이미지 매핑
+  // 썸네일 이미지 매핑 (실제 부산물 이미지 준비 전까지 임시 아이콘 재사용)
   const thumbnailMap = {
     SPRING: new URL('../assets/images/courses/spring_boot.png', import.meta.url).href,
     VUE: new URL('../assets/images/courses/vue_js.png', import.meta.url).href,
@@ -31,11 +32,12 @@ export const useCourseStore = defineStore('course', () => {
   }
 
   const categoryThumbnailMap = {
-    '백엔드': thumbnailMap.SPRING,
-    '프론트엔드': thumbnailMap.VUE,
-    'DevOps': thumbnailMap.KUBERNETES,
-    '데이터': thumbnailMap.PYTHON,
-    'AI': thumbnailMap.AI
+    '폐건전지': thumbnailMap.KUBERNETES,
+    '폐수슬러지': thumbnailMap.DOCKER,
+    '제철슬래그': thumbnailMap.SPRING,
+    '폐합성수지': thumbnailMap.PYTHON,
+    '스크랩금속': thumbnailMap.VUE,
+    '식품부산물': thumbnailMap.AI
   }
 
   function normalizeCategory(category) {
@@ -80,7 +82,7 @@ export const useCourseStore = defineStore('course', () => {
       console.log('[CourseStore] normalized courses =', courses.value)
     } catch (e) {
       console.error('[CourseStore] fetchCourses failed:', e)
-      error.value = e.message || '강의 목록을 불러오지 못했습니다.'
+      error.value = e.message || '원료 목록을 불러오지 못했습니다.'
       courses.value = []
     } finally {
       loading.value = false
@@ -105,7 +107,7 @@ export const useCourseStore = defineStore('course', () => {
       console.log('[CourseStore] normalized selectedCourse =', selectedCourse.value)
     } catch (e) {
       console.error('[CourseStore] fetchCourse failed:', e)
-      error.value = e.message || '강의 정보를 불러오지 못했습니다.'
+      error.value = e.message || '원료 정보를 불러오지 못했습니다.'
       selectedCourse.value = null
     } finally {
       loading.value = false

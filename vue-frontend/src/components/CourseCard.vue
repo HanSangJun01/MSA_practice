@@ -15,7 +15,7 @@
         <span class="price">₩{{ Number(course.price).toLocaleString() }}</span>
       </div>
       <div class="card-footer">
-        <span class="enrolled">수강생 {{ course.enrollmentCount?.toLocaleString() }}명</span>
+        <span class="enrolled">계약 {{ course.enrollmentCount?.toLocaleString() }}건</span>
       </div>
     </div>
   </router-link>
@@ -29,11 +29,12 @@ const props = defineProps({
 })
 
 const categoryConfig = {
-  '백엔드':    { bg: 'thumb-teal',   badge: 'badge-teal',   thumb: 'spring_boot' },
-  '프론트엔드':{ bg: 'thumb-teal',   badge: 'badge-teal',   thumb: 'vue_js' },
-  'DevOps':   { bg: 'thumb-blue',   badge: 'badge-blue',   thumb: 'docker' },
-  '데이터':   { bg: 'thumb-purple', badge: 'badge-purple', thumb: 'python' },
-  'AI':       { bg: 'thumb-pink',   badge: 'badge-pink',   thumb: 'generative_ai' },
+  '폐건전지':   { bg: 'thumb-blue',   badge: 'badge-blue',   thumb: 'kubernetes' },
+  '폐수슬러지': { bg: 'thumb-gray',   badge: 'badge-gray',   thumb: 'docker' },
+  '제철슬래그': { bg: 'thumb-orange', badge: 'badge-orange', thumb: 'spring_boot' },
+  '폐합성수지': { bg: 'thumb-amber',  badge: 'badge-amber',  thumb: 'python' },
+  '스크랩금속': { bg: 'thumb-blue',   badge: 'badge-blue',   thumb: 'vue_js' },
+  '식품부산물': { bg: 'thumb-green',  badge: 'badge-green',  thumb: 'generative_ai' },
 }
 
 const config = computed(() => categoryConfig[props.course.category] || { bg: 'thumb-gray', badge: 'badge-gray' })
@@ -75,12 +76,12 @@ const thumbSrc = computed(() => {
   justify-content: center;
   overflow: hidden;
 }
-.thumb-teal   { background: #E1F5EE; }
-.thumb-blue   { background: #E6F1FB; }
-.thumb-amber  { background: #FAEEDA; }
-.thumb-purple { background: #EEEDFE; }
-.thumb-pink   { background: #FBEAF0; }
-.thumb-gray   { background: #F1EFE8; }
+.thumb-teal,
+.thumb-green  { background: var(--color-brand-green-soft); }
+.thumb-blue   { background: rgba(55, 114, 207, 0.12); }
+.thumb-orange { background: rgba(242, 104, 60, 0.12); }
+.thumb-amber  { background: rgba(217, 119, 6, 0.12); }
+.thumb-gray   { background: var(--color-bg-tertiary); }
 .thumb-img {
   width: 100%;
   height: 100%;

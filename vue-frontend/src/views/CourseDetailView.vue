@@ -10,12 +10,12 @@
             <span class="badge" :class="badgeClass">{{ displayCategory }}</span>
             <h1 class="detail-title">{{ course.title }}</h1>
             <p class="detail-desc">
-              {{ course.description || '실무 전문가가 직접 설계한 커리큘럼으로 체계적으로 학습하세요.' }}
+              {{ course.description || '제3자 품질 검증을 거친 산업 부산물 원료입니다. 성분표와 함량을 확인하세요.' }}
             </p>
 
             <div class="detail-meta">
-              <span>강사: {{ displayInstructorName }}</span>
-              <span>수강생: {{ displayEnrollmentCount }}명</span>
+              <span>공급기업: {{ displayInstructorName }}</span>
+              <span>계약: {{ displayEnrollmentCount }}건</span>
             </div>
           </div>
 
@@ -45,9 +45,9 @@
               </p>
 
               <ul class="enroll-info-list">
-                <li>✅ 즉시 수강 가능</li>
-                <li>✅ 평생 소장</li>
-                <li>✅ 수료증 발급</li>
+                <li>✅ 검증된 성분 분석표 제공</li>
+                <li>✅ 계약 후 인수 일정 안내</li>
+                <li>✅ 품질 시험성적서 제공</li>
               </ul>
             </div>
           </div>
@@ -60,7 +60,7 @@
     </div>
 
     <div v-else class="loading-center">
-      <p class="empty-text">강의 정보를 불러오지 못했습니다.</p>
+      <p class="empty-text">원료 정보를 불러오지 못했습니다.</p>
     </div>
   </div>
 </template>
@@ -87,11 +87,12 @@ const loading = computed(() => courseStore.loading)
 const isInstructor = computed(() => auth.user?.role === 'INSTRUCTOR')
 
 const categoryConfig = {
-  '백엔드': { badge: 'badge-teal', bg: 'thumb-teal', thumb: 'spring_boot' },
-  '프론트엔드': { badge: 'badge-teal', bg: 'thumb-teal', thumb: 'vue_js' },
-  'DevOps': { badge: 'badge-blue', bg: 'thumb-blue', thumb: 'kubernetes' },
-  '데이터': { badge: 'badge-purple', bg: 'thumb-purple', thumb: 'python' },
-  'AI': { badge: 'badge-pink', bg: 'thumb-pink', thumb: 'generative_ai' },
+  '폐건전지': { badge: 'badge-blue', bg: 'thumb-blue', thumb: 'kubernetes' },
+  '폐수슬러지': { badge: 'badge-gray', bg: 'thumb-gray', thumb: 'docker' },
+  '제철슬래그': { badge: 'badge-orange', bg: 'thumb-orange', thumb: 'spring_boot' },
+  '폐합성수지': { badge: 'badge-amber', bg: 'thumb-amber', thumb: 'python' },
+  '스크랩금속': { badge: 'badge-blue', bg: 'thumb-blue', thumb: 'vue_js' },
+  '식품부산물': { badge: 'badge-green', bg: 'thumb-green', thumb: 'generative_ai' },
 }
 
 const config = computed(() => categoryConfig[course.value?.category] || {})
@@ -107,7 +108,7 @@ const displayInstructorName = computed(() => {
     course.value?.instructor?.name ||
     course.value?.instructor_name ||
     course.value?.ownerName ||
-    '강사 정보 없음'
+    '공급기업 정보 없음'
   )
 })
 
@@ -137,10 +138,10 @@ const thumbSrc = computed(() => {
 })
 
 const buttonLabel = computed(() => {
-  if (isInstructor.value) return '강사 계정은 신청 불가'
-  if (enrollmentStatus.value === 'ACTIVE') return '내 수강 목록으로 이동'
-  if (enrollmentStatus.value === 'PENDING') return '신청 완료 · 결제 처리 중'
-  return '결제하고 수강하기'
+  if (isInstructor.value) return '공급기업 계정은 구매 신청 불가'
+  if (enrollmentStatus.value === 'ACTIVE') return '내 구매 목록으로 이동'
+  if (enrollmentStatus.value === 'PENDING') return '신청 완료 · 계약 처리 중'
+  return '계약하고 구매하기'
 })
 
 const buttonDisabled = computed(() => {
@@ -152,18 +153,18 @@ const buttonDisabled = computed(() => {
 
 const helperText = computed(() => {
   if (isInstructor.value) {
-    return '강사 계정은 본인 강의를 수강 신청할 수 없습니다.'
+    return '공급기업 계정은 본인이 등록한 원료를 구매 신청할 수 없습니다.'
   }
 
   if (enrollmentStatus.value === 'ACTIVE') {
-    return '이미 수강 중인 강의입니다. 내 수강 목록에서 바로 이어서 학습할 수 있습니다.'
+    return '이미 계약이 완료된 원료입니다. 내 구매 목록에서 바로 확인할 수 있습니다.'
   }
 
   if (enrollmentStatus.value === 'PENDING') {
-    return '수강 신청이 접수되었습니다. 결제/처리 상태가 반영되면 내 수강 목록에서 확인할 수 있습니다.'
+    return '구매 신청이 접수되었습니다. 계약/처리 상태가 반영되면 내 구매 목록에서 확인할 수 있습니다.'
   }
 
-  return '결제를 진행하면 수강 신청이 함께 처리됩니다.'
+  return '계약을 진행하면 구매 신청이 함께 처리됩니다.'
 })
 
 async function loadEnrollmentStatus() {
@@ -200,12 +201,12 @@ async function handlePrimaryAction() {
   enrollError.value = ''
 
   if (!course.value?.id) {
-    enrollError.value = '강의 정보가 올바르지 않습니다.'
+    enrollError.value = '원료 정보가 올바르지 않습니다.'
     return
   }
 
   if (isInstructor.value) {
-    enrollError.value = '강사 계정은 본인 강의를 수강 신청할 수 없습니다.'
+    enrollError.value = '공급기업 계정은 본인이 등록한 원료를 구매 신청할 수 없습니다.'
     return
   }
 
@@ -225,7 +226,7 @@ async function handlePrimaryAction() {
     enrollmentStatus.value = 'PENDING'
   } catch (e) {
     console.error('[CourseDetail] enroll failed:', e)
-    enrollError.value = e.response?.data?.message || '결제/수강 신청에 실패했습니다.'
+    enrollError.value = e.response?.data?.message || '계약/구매 신청에 실패했습니다.'
   } finally {
     enrolling.value = false
   }
@@ -256,7 +257,7 @@ watch(
 }
 
 .detail-hero {
-  background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 100%);
+  background: linear-gradient(135deg, var(--color-bg-tertiary) 0%, var(--color-bg-secondary) 100%);
   border-bottom: 1px solid var(--color-border);
   padding: 48px 0;
 }
@@ -319,11 +320,11 @@ watch(
   padding: 20px;
 }
 
-.thumb-teal { background: #E1F5EE; }
-.thumb-blue { background: #E6F1FB; }
-.thumb-purple { background: #EEEDFE; }
-.thumb-pink { background: #FBEAF0; }
-.thumb-gray { background: #F1EFE8; }
+.thumb-green  { background: var(--color-brand-green-soft); }
+.thumb-blue   { background: rgba(55, 114, 207, 0.12); }
+.thumb-orange { background: rgba(242, 104, 60, 0.12); }
+.thumb-amber  { background: rgba(217, 119, 6, 0.12); }
+.thumb-gray   { background: var(--color-bg-tertiary); }
 
 .enroll-body {
   padding: 20px;
@@ -391,7 +392,7 @@ watch(
   width: 40px;
   height: 40px;
   border: 3px solid var(--color-border);
-  border-top-color: var(--color-primary);
+  border-top-color: var(--color-brand-green);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }

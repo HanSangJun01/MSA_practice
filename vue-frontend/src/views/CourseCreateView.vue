@@ -13,7 +13,7 @@
             class="sidebar-item"
             :class="{ active: $route.path === '/courses' }"
           >
-            <span class="si-icon">📚</span> 강의 목록
+            <span class="si-icon">🔩</span> 원료 목록
           </router-link>
 
           <router-link
@@ -21,7 +21,7 @@
             class="sidebar-item"
             :class="{ active: $route.path === '/courses/new' }"
           >
-            <span class="si-icon">✍️</span> 강의 등록
+            <span class="si-icon">✍️</span> 원료 등록
           </router-link>
 
           <router-link to="/mypage" class="sidebar-item">
@@ -44,33 +44,33 @@
       <main class="main-content">
         <div class="content-header">
           <div>
-            <h1 class="page-title">강의 등록</h1>
-            <p class="page-subtitle">강사 계정으로 새로운 강의를 등록합니다.</p>
+            <h1 class="page-title">원료 등록</h1>
+            <p class="page-subtitle">공급기업 계정으로 새로운 원료를 등록합니다.</p>
           </div>
         </div>
 
         <div class="form-card">
           <form class="course-form" @submit.prevent="handleSubmit">
             <div class="form-group">
-              <label class="form-label" for="title">강의명</label>
+              <label class="form-label" for="title">원료명</label>
               <input
                 id="title"
                 v-model.trim="form.title"
                 type="text"
                 class="form-input"
-                placeholder="예: Cloud Native App기반 Web Service 개발"
+                placeholder="예: 리튬이온 배터리 블랙매스 (Ni·Co·Mn 함량 표기)"
                 maxlength="100"
               />
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="description">강의 설명</label>
+              <label class="form-label" for="description">원료 설명</label>
               <textarea
                 id="description"
                 v-model.trim="form.description"
                 class="form-textarea"
                 rows="6"
-                placeholder="강의 소개, 학습 목표, 대상 등을 입력해 주세요."
+                placeholder="부산물 성분, 월 발생량, 보관 상태, 활용 가능 용도 등을 입력해 주세요."
               ></textarea>
             </div>
 
@@ -122,7 +122,7 @@
 
               <button type="submit" class="btn btn-primary" :disabled="submitting">
                 <span v-if="submitting">등록 중...</span>
-                <span v-else>강의 등록</span>
+                <span v-else>원료 등록</span>
               </button>
             </div>
           </form>
@@ -155,10 +155,12 @@ const submitError = ref('')
 const submitSuccess = ref('')
 
 const categoryOptions = [
-  { label: '백엔드', value: 'BACKEND' },
-  { label: '프론트엔드', value: 'FRONTEND' },
-  { label: 'DevOps', value: 'DEVOPS' },
-  { label: 'AI / 데이터', value: 'DATA_SCIENCE' }
+  { label: '폐건전지 (블랙매스)', value: 'WASTE_BATTERY' },
+  { label: '폐수슬러지', value: 'WASTEWATER_SLUDGE' },
+  { label: '제철소 슬래그', value: 'STEEL_SLAG' },
+  { label: '폐합성수지·폐비닐', value: 'WASTE_PLASTIC' },
+  { label: '스크랩 금속·동선', value: 'SCRAP_METAL' },
+  { label: '수산·식품 가공 부산물', value: 'FOOD_BYPRODUCT' }
 ]
 
 function handleLogout() {
@@ -170,17 +172,17 @@ function validateForm() {
   validationError.value = ''
 
   if (!auth.user || auth.user.role !== 'INSTRUCTOR') {
-    validationError.value = '강사 계정만 강의를 등록할 수 있습니다.'
+    validationError.value = '공급기업 계정만 원료를 등록할 수 있습니다.'
     return false
   }
 
   if (!form.title) {
-    validationError.value = '강의명을 입력해 주세요.'
+    validationError.value = '원료명을 입력해 주세요.'
     return false
   }
 
   if (!form.description) {
-    validationError.value = '강의 설명을 입력해 주세요.'
+    validationError.value = '원료 설명을 입력해 주세요.'
     return false
   }
 
@@ -222,7 +224,7 @@ async function handleSubmit() {
     const res = await courseApi.create(payload)
     console.log('[CourseCreate] create response =', res.data)
 
-    submitSuccess.value = '강의가 성공적으로 등록되었습니다.'
+    submitSuccess.value = '원료가 성공적으로 등록되었습니다.'
 
     const createdCourseId =
       res.data?.data?.id ??
@@ -241,7 +243,7 @@ async function handleSubmit() {
     console.error('[CourseCreate] create failed:', error)
     submitError.value =
       error.response?.data?.message ||
-      '강의 등록에 실패했습니다.'
+      '원료 등록에 실패했습니다.'
   } finally {
     submitting.value = false
   }
@@ -310,8 +312,8 @@ async function handleSubmit() {
 }
 
 .sidebar-item.active {
-  background: var(--color-primary-light);
-  color: var(--color-primary);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
   font-weight: 500;
 }
 
@@ -395,8 +397,8 @@ async function handleSubmit() {
 .form-input:focus,
 .form-textarea:focus,
 .form-select:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+  border-color: var(--color-brand-green);
+  box-shadow: 0 0 0 3px var(--color-brand-green-soft);
 }
 
 .form-textarea {

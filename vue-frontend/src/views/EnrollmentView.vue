@@ -7,7 +7,7 @@
           <div class="sidebar-label">메뉴</div>
 
           <router-link to="/courses" class="sidebar-item">
-            <span class="si-icon">📚</span> 강의 목록
+            <span class="si-icon">📚</span> 원료 목록
           </router-link>
 
           <router-link
@@ -15,7 +15,7 @@
             to="/enrollments"
             class="sidebar-item active"
           >
-            <span class="si-icon">✅</span> 내 수강 목록
+            <span class="si-icon">✅</span> 내 구매 목록
           </router-link>
 
           <router-link to="/mypage" class="sidebar-item">
@@ -35,7 +35,7 @@
       </aside>
 
       <main class="main-content">
-        <h1 class="page-title">내 수강 목록</h1>
+        <h1 class="page-title">내 구매 목록</h1>
 
         <div v-if="loading" class="loading-center">
           <div class="spinner"></div>
@@ -52,7 +52,7 @@
                 {{ item.course?.category }}
               </span>
               <h3 class="enroll-title">{{ item.course?.title }}</h3>
-              <p class="enroll-instructor">강사: {{ item.course?.instructorName }}</p>
+              <p class="enroll-instructor">공급기업: {{ item.course?.instructorName }}</p>
             </div>
 
             <div class="enroll-status">
@@ -62,10 +62,10 @@
                   item.status === 'ACTIVE' ? 'status-active' : 'status-pending'
                 ]"
               >
-                {{ item.status === 'ACTIVE' ? '수강 중' : '대기 중' }}
+                {{ item.status === 'ACTIVE' ? '계약 완료' : '계약 대기' }}
               </span>
               <router-link :to="`/courses/${item.courseId}`" class="btn btn-ghost btn-sm">
-                강의 보기
+                원료 보기
               </router-link>
             </div>
           </div>
@@ -73,9 +73,9 @@
 
         <div v-else class="empty-state">
           <p class="empty-icon">📭</p>
-          <p>수강 중인 강의가 없습니다.</p>
+          <p>구매한 원료가 없습니다.</p>
           <router-link to="/courses" class="btn btn-primary" style="margin-top:16px;">
-            강의 둘러보기
+            원료 둘러보기
           </router-link>
         </div>
       </main>
@@ -99,11 +99,12 @@ const loading = ref(true)
 const isInstructor = computed(() => auth.user?.role === 'INSTRUCTOR')
 
 const categoryConfig = {
-  '백엔드': { bg: 'thumb-teal', badge: 'badge-teal', thumb: 'spring_boot' },
-  '프론트엔드': { bg: 'thumb-teal', badge: 'badge-teal', thumb: 'vue_js' },
-  'DevOps': { bg: 'thumb-blue', badge: 'badge-blue', thumb: 'kubernetes' },
-  '데이터': { bg: 'thumb-purple', badge: 'badge-purple', thumb: 'python' },
-  'AI': { bg: 'thumb-pink', badge: 'badge-pink', thumb: 'generative_ai' },
+  '폐건전지': { bg: 'thumb-blue', badge: 'badge-blue', thumb: 'kubernetes' },
+  '폐수슬러지': { bg: 'thumb-gray', badge: 'badge-gray', thumb: 'docker' },
+  '제철슬래그': { bg: 'thumb-orange', badge: 'badge-orange', thumb: 'spring_boot' },
+  '폐합성수지': { bg: 'thumb-amber', badge: 'badge-amber', thumb: 'python' },
+  '스크랩금속': { bg: 'thumb-blue', badge: 'badge-blue', thumb: 'vue_js' },
+  '식품부산물': { bg: 'thumb-green', badge: 'badge-green', thumb: 'generative_ai' },
 }
 
 function getThumbBg(cat) {
@@ -130,7 +131,7 @@ function handleLogout() {
 }
 
 onMounted(async () => {
-  // 강사는 이 페이지 접근 불가 → 마이페이지로 이동
+  // 공급기업은 이 페이지 접근 불가 → 마이페이지로 이동
   if (isInstructor.value) {
     console.warn('[EnrollmentView] instructor tried to access /enrollments, redirect to /mypage')
     router.replace('/mypage')
@@ -218,8 +219,8 @@ onMounted(async () => {
 }
 
 .sidebar-item.active {
-  background: var(--color-primary-light);
-  color: var(--color-primary);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
   font-weight: 500;
 }
 
@@ -276,24 +277,24 @@ onMounted(async () => {
   padding: 8px;
 }
 
-.thumb-teal {
-  background: #E1F5EE;
+.thumb-green {
+  background: var(--color-brand-green-soft);
 }
 
 .thumb-blue {
-  background: #E6F1FB;
+  background: rgba(55, 114, 207, 0.12);
 }
 
-.thumb-purple {
-  background: #EEEDFE;
+.thumb-orange {
+  background: rgba(242, 104, 60, 0.12);
 }
 
-.thumb-pink {
-  background: #FBEAF0;
+.thumb-amber {
+  background: rgba(217, 119, 6, 0.12);
 }
 
 .thumb-gray {
-  background: #F1EFE8;
+  background: var(--color-bg-tertiary);
 }
 
 .enroll-info {
@@ -328,13 +329,13 @@ onMounted(async () => {
 }
 
 .status-active {
-  background: #E1F5EE;
-  color: #0F6E56;
+  background: var(--color-brand-green-soft);
+  color: var(--color-brand-green-deep);
 }
 
 .status-pending {
-  background: #FAEEDA;
-  color: #854F0B;
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-tertiary);
 }
 
 .btn-sm {
@@ -363,7 +364,7 @@ onMounted(async () => {
   width: 36px;
   height: 36px;
   border: 3px solid var(--color-border);
-  border-top-color: var(--color-primary);
+  border-top-color: var(--color-brand-green);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }

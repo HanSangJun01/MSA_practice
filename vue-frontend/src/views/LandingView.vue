@@ -6,30 +6,30 @@
     <section class="hero">
       <div class="hero-inner">
         <div class="hero-content fade-in-up">
-          <span class="hero-badge">MSA 기반 교육 플랫폼</span>
-          <h1 class="hero-title">배움을 더 스마트하게,<br>커리어를 더 빠르게</h1>
-          <p class="hero-desc">개발, 디자인, 비즈니스 분야의 전문가 강의를 수강하고 실력을 키워보세요.</p>
+          <span class="hero-badge">성분 기반 산업 부산물 순환거래 플랫폼</span>
+          <h1 class="hero-title">부산물을 보지 마세요,<br>성분을 보세요</h1>
+          <p class="hero-desc">제조 공정에서 발생하는 산업 부산물을 필요로 하는 기업과 연결하고, 처리 비용을 판매 수익으로 바꿔보세요.</p>
           <div class="hero-actions">
-            <router-link to="/login" class="btn btn-primary btn-lg">무료로 시작하기</router-link>
-            <router-link to="/courses" class="btn btn-outline btn-lg">강의 둘러보기</router-link>
+            <router-link to="/login" class="btn btn-accent-green btn-lg">무료로 시작하기</router-link>
+            <router-link to="/courses" class="btn btn-on-dark-outline btn-lg">원료 둘러보기</router-link>
           </div>
           <div class="hero-stats">
-            <div class="stat"><span class="stat-num">1,200+</span><span class="stat-label">강의</span></div>
-            <div class="stat"><span class="stat-num">340+</span><span class="stat-label">강사</span></div>
-            <div class="stat"><span class="stat-num">28,000+</span><span class="stat-label">수강생</span></div>
+            <div class="stat"><span class="stat-num">1,200+</span><span class="stat-label">등록 원료</span></div>
+            <div class="stat"><span class="stat-num">340+</span><span class="stat-label">공급기업</span></div>
+            <div class="stat"><span class="stat-num">28,000+</span><span class="stat-label">계약 건수</span></div>
           </div>
         </div>
         <div class="hero-visual fade-in">
-          <img src="@/assets/images/logo/main_logo.png" alt="LearnNexus" class="hero-logo" />
+          <img src="@/assets/images/logo/main_logo.png" alt="Elemento" class="hero-logo" />
         </div>
       </div>
     </section>
 
-    <!-- 인기 강의 -->
+    <!-- 인기 원료 -->
     <section class="popular-section">
       <div class="section-inner">
         <div class="section-header">
-          <h2 class="section-title">인기 강의</h2>
+          <h2 class="section-title">인기 원료</h2>
           <router-link to="/login" class="section-link">전체 보기 →</router-link>
         </div>
         <div class="course-grid">
@@ -41,7 +41,7 @@
               <span class="badge" :class="course.badgeClass">{{ course.category }}</span>
               <h3 class="card-title">{{ course.title }}</h3>
               <div class="card-meta">
-                <span class="instructor">{{ course.instructor }}</span>
+                <span class="instructor">{{ course.supplier }}</span>
                 <span class="price">{{ course.price }}</span>
               </div>
             </div>
@@ -53,7 +53,7 @@
     <!-- 특징 섹션 -->
     <section class="features-section">
       <div class="section-inner">
-        <h2 class="section-title center">왜 LearnNexus인가요?</h2>
+        <h2 class="section-title center">왜 Elemento인가요?</h2>
         <div class="features-grid">
           <div v-for="f in features" :key="f.title" class="feature-card">
             <div class="feature-icon">{{ f.icon }}</div>
@@ -68,7 +68,7 @@
     <section class="cta-section">
       <div class="cta-inner">
         <h2>지금 바로 시작하세요</h2>
-        <p>수천 명의 개발자들이 LearnNexus와 함께 성장하고 있습니다.</p>
+        <p>수백 개 기업이 Elemento와 함께 부산물을 자원으로 바꾸고 있습니다.</p>
         <router-link to="/login" class="btn btn-primary btn-lg">무료로 시작하기</router-link>
       </div>
     </section>
@@ -77,10 +77,10 @@
     <footer class="footer">
       <div class="footer-inner">
         <div class="footer-logo">
-          <img src="@/assets/images/logo/main_logo.png" alt="LearnNexus" />
-          <span>LearnNexus</span>
+          <img src="@/assets/images/logo/main_logo.png" alt="Elemento" />
+          <span>Elemento</span>
         </div>
-        <p class="footer-copy">© 2026 LearnNexus. All rights reserved.</p>
+        <p class="footer-copy">© 2026 Elemento. All rights reserved.</p>
       </div>
     </footer>
   </div>
@@ -97,30 +97,30 @@ import pythonImg   from '@/assets/images/courses/python.png'
 import genaiImg    from '@/assets/images/courses/generative_ai.png'
 
 const featuredCourses = [
-  { id:1, title:'Spring Boot MSA 완성', category:'백엔드',    instructor:'김강사', price:'₩89,000', thumbSrc: springImg, thumbBg:'thumb-teal',   badgeClass:'badge-teal'   },
-  { id:2, title:'Vue 3 실전 프로젝트',  category:'프론트엔드', instructor:'이강사', price:'₩69,000', thumbSrc: vueImg,    thumbBg:'thumb-teal',   badgeClass:'badge-teal'   },
-  { id:3, title:'Kubernetes 운영 가이드',category:'DevOps',   instructor:'박강사', price:'₩99,000', thumbSrc: k8sImg,    thumbBg:'thumb-blue',   badgeClass:'badge-blue'   },
-  { id:4, title:'Docker 컨테이너 실전', category:'DevOps',    instructor:'정강사', price:'₩79,000', thumbSrc: dockerImg, thumbBg:'thumb-blue',   badgeClass:'badge-blue'   },
-  { id:5, title:'Python 데이터 분석',   category:'데이터',    instructor:'최강사', price:'₩59,000', thumbSrc: pythonImg, thumbBg:'thumb-purple', badgeClass:'badge-purple' },
-  { id:6, title:'Generative AI 실전',   category:'AI',        instructor:'한강사', price:'₩75,000', thumbSrc: genaiImg,  thumbBg:'thumb-pink',   badgeClass:'badge-pink'   },
+  { id:1, title:'리튬이온 배터리 블랙매스', category:'폐건전지',   supplier:'리커버메탈',   price:'₩1,200,000', thumbSrc: k8sImg,    thumbBg:'thumb-blue',   badgeClass:'badge-blue'   },
+  { id:2, title:'반도체 폐수슬러지 (CaF₂)', category:'폐수슬러지', supplier:'케미리사이클', price:'협의',        thumbSrc: dockerImg, thumbBg:'thumb-gray',   badgeClass:'badge-gray'   },
+  { id:3, title:'제철소 고로 슬래그',       category:'제철슬래그', supplier:'스틸사이클',   price:'협의',        thumbSrc: springImg, thumbBg:'thumb-orange', badgeClass:'badge-orange' },
+  { id:4, title:'폐합성수지 열분해유 원료', category:'폐합성수지', supplier:'리사이클텍',   price:'₩620,000',   thumbSrc: pythonImg, thumbBg:'thumb-amber',  badgeClass:'badge-amber'  },
+  { id:5, title:'구리 스크랩·동선',         category:'스크랩금속', supplier:'메탈리커버리', price:'₩1,050,000', thumbSrc: vueImg,    thumbBg:'thumb-blue',   badgeClass:'badge-blue'   },
+  { id:6, title:'수산 가공 부산물 (콜라겐 원료)', category:'식품부산물', supplier:'크래프트바이오', price:'₩180,000', thumbSrc: genaiImg,  thumbBg:'thumb-green',  badgeClass:'badge-green'  },
 ]
 
 const features = [
-  { icon:'🚀', title:'실무 중심 커리큘럼', desc:'현업 전문가가 직접 설계한 실무 중심 강의로 빠르게 성장하세요.' },
-  { icon:'🎯', title:'맞춤 강의 추천', desc:'AI 기반 추천 시스템이 수강 이력을 분석해 딱 맞는 강의를 추천합니다.' },
-  { icon:'💳', title:'간편한 수강 신청', desc:'원클릭 결제와 즉시 수강으로 학습을 바로 시작하세요.' },
-  { icon:'📱', title:'언제 어디서나', desc:'PC, 태블릿, 모바일 어디서든 끊김 없이 학습하세요.' },
+  { icon:'🧪', title:'성분 기반 AI 매칭', desc:'필요 성분을 등록하면 부산물 성분표와 대조해 최적의 거래를 먼저 제안합니다 (Elemento Match).' },
+  { icon:'✅', title:'제3자 품질 검증', desc:'공인 시험기관이 검증한 로트별 성분 분석표로 안심하고 거래하세요.' },
+  { icon:'💳', title:'간편한 계약 결제', desc:'원클릭 계약과 즉시 결제로 거래를 빠르게 진행하세요.' },
+  { icon:'📊', title:'ESG·비용 절감 리포트', desc:'폐기비용 절감액과 탄소 절감량을 한눈에 확인하세요.' },
 ]
 </script>
 
 <style scoped>
 .landing { background: var(--color-bg-secondary); }
 
-/* 히어로 */
+/* 히어로 — 다크 틸 → 민트 atmospheric 그라데이션 */
 .hero {
-  background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 50%, #f0f9ff 100%);
-  border-bottom: 1px solid var(--color-border);
-  padding: 80px 0 64px;
+  background: linear-gradient(160deg, #06120F 0%, #0B2A24 42%, #0F6E56 100%);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding: 88px 0 72px;
 }
 .hero-inner {
   max-width: 1200px;
@@ -134,9 +134,9 @@ const features = [
 .hero-badge {
   display: inline-block;
   padding: 5px 14px;
-  background: var(--color-primary-light);
-  color: var(--color-primary);
-  border-radius: 20px;
+  background: rgba(0, 212, 164, 0.16);
+  color: var(--color-brand-green);
+  border-radius: var(--radius-full);
   font-size: 12px;
   font-weight: 600;
   margin-bottom: 16px;
@@ -146,12 +146,12 @@ const features = [
   font-weight: 700;
   line-height: 1.25;
   letter-spacing: -0.5px;
-  color: var(--color-text-primary);
+  color: var(--color-on-dark);
   margin-bottom: 16px;
 }
 .hero-desc {
   font-size: 16px;
-  color: var(--color-text-secondary);
+  color: var(--color-on-dark-muted);
   line-height: 1.7;
   max-width: 460px;
   margin-bottom: 28px;
@@ -162,13 +162,33 @@ const features = [
   margin-bottom: 40px;
 }
 .btn-lg { padding: 12px 28px; font-size: 15px; }
+.btn-accent-green {
+  background: var(--color-brand-green);
+  color: #06120F;
+  border: 1.5px solid var(--color-brand-green);
+  font-weight: 600;
+}
+.btn-accent-green:hover {
+  background: #33DDB4;
+  border-color: #33DDB4;
+  box-shadow: var(--shadow-accent);
+}
+.btn-on-dark-outline {
+  background: transparent;
+  color: var(--color-on-dark);
+  border: 1.5px solid rgba(255,255,255,0.28);
+}
+.btn-on-dark-outline:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.4);
+}
 .hero-stats {
   display: flex;
   gap: 36px;
 }
 .stat { display: flex; flex-direction: column; gap: 2px; }
-.stat-num { font-size: 22px; font-weight: 700; color: var(--color-primary); }
-.stat-label { font-size: 12px; color: var(--color-text-secondary); }
+.stat-num { font-size: 22px; font-weight: 700; color: var(--color-brand-green); }
+.stat-label { font-size: 12px; color: var(--color-on-dark-muted); }
 .hero-visual {
   display: flex;
   align-items: center;
@@ -179,7 +199,7 @@ const features = [
   height: 200px;
   object-fit: contain;
   border-radius: 24px;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 24px 48px -8px rgba(0,0,0,0.45);
 }
 
 /* 강의 섹션 */
@@ -219,10 +239,11 @@ const features = [
   justify-content: center;
   overflow: hidden;
 }
-.thumb-teal   { background: #E1F5EE; }
-.thumb-blue   { background: #E6F1FB; }
-.thumb-purple { background: #EEEDFE; }
-.thumb-pink   { background: #FBEAF0; }
+.thumb-green  { background: var(--color-brand-green-soft); }
+.thumb-blue   { background: rgba(55, 114, 207, 0.12); }
+.thumb-orange { background: rgba(242, 104, 60, 0.12); }
+.thumb-amber  { background: rgba(217, 119, 6, 0.12); }
+.thumb-gray   { background: var(--color-bg-tertiary); }
 .thumb-img { width: 100%; height: 100%; object-fit: contain; padding: 14px; }
 .card-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
 .card-title { font-size: 14px; font-weight: 600; color: var(--color-text-primary); line-height: 1.4; }
@@ -250,26 +271,27 @@ const features = [
 .feature-title { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
 .feature-desc { font-size: 13px; color: var(--color-text-secondary); line-height: 1.6; }
 
-/* CTA */
+/* CTA — promo-banner 패턴 (canvas-dark 배경 + on-dark 텍스트 + on-dark 화이트 필 버튼) */
 .cta-section {
   padding: 80px 0;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  background: var(--color-canvas-dark);
   text-align: center;
 }
 .cta-inner { max-width: 600px; margin: 0 auto; padding: 0 24px; }
-.cta-inner h2 { font-size: 32px; font-weight: 700; color: #fff; margin-bottom: 12px; }
-.cta-inner p { font-size: 16px; color: rgba(255,255,255,0.8); margin-bottom: 32px; }
+.cta-inner h2 { font-size: 32px; font-weight: 700; color: var(--color-on-dark); margin-bottom: 12px; }
+.cta-inner p { font-size: 16px; color: var(--color-on-dark-muted); margin-bottom: 32px; }
 .cta-inner .btn-primary {
-  background: #fff;
+  background: var(--color-on-dark);
   color: var(--color-primary);
-  border-color: #fff;
+  border-color: var(--color-on-dark);
   font-weight: 600;
 }
-.cta-inner .btn-primary:hover { background: #f0f7ff; }
+.cta-inner .btn-primary:hover { background: #fff; }
 
-/* 푸터 */
+/* 푸터 — design.md footer-region: canvas 화이트 + 상단 hairline */
 .footer {
-  background: var(--color-text-primary);
+  background: var(--color-bg-primary);
+  border-top: 1px solid var(--color-border);
   padding: 32px 0;
 }
 .footer-inner {
@@ -284,10 +306,10 @@ const features = [
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #fff;
+  color: var(--color-text-primary);
   font-size: 15px;
   font-weight: 600;
 }
 .footer-logo img { width: 28px; height: 28px; border-radius: 6px; }
-.footer-copy { font-size: 13px; color: rgba(255,255,255,0.5); }
+.footer-copy { font-size: 13px; color: var(--color-text-muted); }
 </style>
