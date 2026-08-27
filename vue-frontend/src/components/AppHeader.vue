@@ -3,7 +3,7 @@
     <div class="header-inner">
       <!-- 로고 -->
       <router-link to="/" class="logo">
-        <img src="@/assets/images/logo/main_logo.png" alt="LearnNexus" class="logo-img" />
+        <img src="@/assets/images/logo/elemento_logo.png" alt="LearnNexus" class="logo-img" />
         <span class="logo-text">LearnNexus</span>
       </router-link>
 

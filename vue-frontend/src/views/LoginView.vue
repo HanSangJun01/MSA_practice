@@ -4,12 +4,12 @@
       <!-- 좌측 브랜딩 -->
       <div class="login-left">
         <div class="brand">
-          <img src="@/assets/images/logo/main_logo.png" alt="LearnNexus" class="brand-logo" />
-          <span class="brand-name">LearnNexus</span>
+          <img src="@/assets/images/logo/elemento_logo.png" alt="LearnNexus" class="brand-logo" />
+          <span class="brand-name">Elemento</span>
         </div>
         <div class="brand-content">
-          <h2>다시 만나서<br>반갑습니다</h2>
-          <p>로그인하고 나만의 학습 여정을 이어가세요.</p>
+          <h2>다시 만나서 반갑습니다</h2>
+          <p>로그인하고 산업 부산물 거래를 시작해보세요.</p>
           <ul class="feature-list">
             <li v-for="f in features" :key="f">
               <span class="dot"></span>{{ f }}
@@ -26,7 +26,7 @@
           <!-- 로그인 영역 -->
           <div v-if="!showRegister" class="section">
             <h3 class="section-title">로그인</h3>
-            <p class="section-desc">LearnNexus 계정으로 로그인합니다.</p>
+            <p class="section-desc">Elemento 계정으로 로그인합니다.</p>
             <button class="btn btn-primary btn-full" @click="handleOAuth">로그인</button>
             <div class="switch-link">
               계정이 없으신가요?
@@ -53,8 +53,9 @@
               <div class="form-group">
                 <label class="form-label">역할</label>
                 <select v-model="registerForm.role" class="form-input">
-                  <option value="STUDENT">학생</option>
-                  <option value="INSTRUCTOR">강사</option>
+                  <option value="STUDENT">판매사</option>
+                  <option value="INSTRUCTOR">검증사</option>
+                  <option value="INSTRUCTOR">구매사</option>
                 </select>
               </div>
               <div v-if="error" class="error-msg">{{ error }}</div>
@@ -90,7 +91,7 @@ const success = ref('')
 
 const registerForm = ref({ name: '', email: '', password: '', role: 'STUDENT' })
 
-const features = ['수강 중인 강의 이어보기', '맞춤 강의 추천', '수료증 관리']
+const features = ['판매 산업 부산물 등록하기', '구매 희망 원료 매칭 받기', '원료 품질 검증 하기']
 
 function handleOAuth() {
   auth.redirectToLogin()
@@ -136,7 +137,7 @@ async function handleRegister() {
   gap: 48px;
 }
 .brand { display: flex; align-items: center; gap: 10px; }
-.brand-logo { width: 40px; height: 40px; border-radius: 10px; object-fit: contain; }
+.brand-logo { width: 56px; height: 56px; border-radius: 10px; object-fit: contain; }
 .brand-name { font-size: 18px; font-weight: 700; color: #fff; }
 .brand-content h2 {
   font-size: 32px; font-weight: 700; color: #fff;

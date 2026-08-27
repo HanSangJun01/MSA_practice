@@ -6,12 +6,12 @@
     <section class="hero">
       <div class="hero-inner">
         <div class="hero-content fade-in-up">
-          <span class="hero-badge">MSA 기반 교육 플랫폼</span>
-          <h1 class="hero-title">배움을 더 스마트하게,<br>커리어를 더 빠르게</h1>
-          <p class="hero-desc">개발, 디자인, 비즈니스 분야의 전문가 강의를 수강하고 실력을 키워보세요.</p>
+          <span class="hero-badge">성분 기반 순환거래 플랫폼</span>
+          <h1 class="hero-title">부산물을 보지 마세요, <br>성분을 보세요</h1>
+          <p class="hero-desc"> 공장과 공장을 잇는 가장 스마트한 원소 매칭 시스템 </p>
           <div class="hero-actions">
-            <router-link to="/login" class="btn btn-primary btn-lg">무료로 시작하기</router-link>
-            <router-link to="/courses" class="btn btn-outline btn-lg">강의 둘러보기</router-link>
+            <router-link to="/login" class="btn btn-primary btn-lg">Elemento Logging</router-link>
+            <router-link to="/courses" class="btn btn-outline btn-lg">Elemento Match</router-link>
           </div>
           <div class="hero-stats">
             <div class="stat"><span class="stat-num">1,200+</span><span class="stat-label">강의</span></div>
@@ -20,7 +20,7 @@
           </div>
         </div>
         <div class="hero-visual fade-in">
-          <img src="@/assets/images/logo/main_logo.png" alt="LearnNexus" class="hero-logo" />
+          <img src="@/assets/images/logo/elemento_logo_transparent.png" alt="LearnNexus" class="hero-logo" />
         </div>
       </div>
     </section>
@@ -77,7 +77,7 @@
     <footer class="footer">
       <div class="footer-inner">
         <div class="footer-logo">
-          <img src="@/assets/images/logo/main_logo.png" alt="LearnNexus" />
+          <img src="@/assets/images/logo/elemento_logo.png" alt="LearnNexus" />
           <span>LearnNexus</span>
         </div>
         <p class="footer-copy">© 2026 LearnNexus. All rights reserved.</p>
@@ -175,11 +175,9 @@ const features = [
   justify-content: center;
 }
 .hero-logo {
-  width: 200px;
-  height: 200px;
+  width: 560px;
+  height: 560px;
   object-fit: contain;
-  border-radius: 24px;
-  box-shadow: var(--shadow-lg);
 }
 
 /* 강의 섹션 */
@@ -288,6 +286,6 @@ const features = [
   font-size: 15px;
   font-weight: 600;
 }
-.footer-logo img { width: 28px; height: 28px; border-radius: 6px; }
+.footer-logo img { width: 40px; height: 40px; border-radius: 6px; }
 .footer-copy { font-size: 13px; color: rgba(255,255,255,0.5); }
 </style>
