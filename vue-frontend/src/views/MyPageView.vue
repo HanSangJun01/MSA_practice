@@ -250,7 +250,10 @@ async function loadStudentRecommendations() {
 
     const payload = res.data
 
-    if (Array.isArray(payload?.recommendedCourses)) {
+    if (Array.isArray(payload?.recommendedLots)) {
+      recommendations.value = payload.recommendedLots
+      recommendMessage.value = payload.message ?? ''
+    } else if (Array.isArray(payload?.recommendedCourses)) {
       recommendations.value = payload.recommendedCourses
       recommendMessage.value = payload.message ?? ''
     } else if (Array.isArray(payload?.data)) {
