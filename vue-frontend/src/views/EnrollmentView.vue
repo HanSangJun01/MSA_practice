@@ -7,7 +7,7 @@
           <div class="sidebar-label">메뉴</div>
 
           <router-link to="/courses" class="sidebar-item">
-            <span class="si-icon">📚</span> 원료 목록
+            <span class="si-icon">📚</span> 산업 부산물 목록
           </router-link>
 
           <router-link
