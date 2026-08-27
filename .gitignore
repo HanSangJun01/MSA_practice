@@ -12,3 +12,5 @@ node_modules/
 .omc/
 *.zip
 docs/
+__pycache__/
+*.pyc
