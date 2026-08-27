@@ -22,6 +22,12 @@ import java.util.List;
  * Gateway 호환을 위해 /api/courses 경로를 유지한다 (/api/materials 로 바꾸지 않는다).
  * X-User-Id 는 Gateway 의 JwtAuthenticationFilter 가 주입한다.
  * 서비스를 8082 로 직접 호출하면 이 헤더가 없으므로 400 으로 거절된다.
+ *
+ * 쓰기 API 에 PATCH 가 아니라 PUT 을 쓰는 이유:
+ * Gateway 이미지의 CORS allowedMethods 가 GET,POST,PUT,DELETE,OPTIONS 로 하드코딩돼 있어
+ * PATCH 는 브라우저 preflight 가 403 으로 막힌다. 프로퍼티 바인딩이 없어 환경변수로도 못 바꾼다.
+ * 부분 수정 의미론에는 PATCH 가 맞지만 이미지를 수정할 수 없는 제약이 우선이다.
+ * 요청 본문의 부분 수정 동작(null 필드는 변경하지 않음)은 그대로 유지한다.
  */
 @Tag(name = "판매 로트", description = """
         순환원료 판매 로트. `Course` 한 건은 재사용 가능한 상품 마스터가 아니라
@@ -53,6 +59,11 @@ import java.util.List;
 
         Gateway 호환을 위해 `/api/courses` 경로를 유지한다(`/api/materials`로 바꾸지 않는다).
         내부 필드명도 기존 계약을 유지하며 외부 응답에서만 용어를 바꾼다.
+
+        쓰기 API는 부분 수정이지만 **PUT**을 쓴다. Gateway 이미지의 CORS `allowedMethods`가
+        `GET,POST,PUT,DELETE,OPTIONS`로 하드코딩돼 있어 PATCH는 브라우저 preflight가 403으로 막히고,
+        프로퍼티 바인딩이 없어 환경변수로도 바꿀 수 없기 때문이다.
+        본문의 부분 수정 동작(null 필드는 변경하지 않음)은 그대로다.
 
         | 의미 | 외부 응답 | 내부(`/internal/**`) |
         |---|---|---|
@@ -212,12 +223,13 @@ public class CourseController {
     @Operation(summary = "판매 로트 수정 (공급기업 본인)", description = """
             공급기업이 자기 로트를 수정한다. **소유권 검사**(`instructorId == X-User-Id`)를 한다.
 
-            `PENDING` 또는 `REJECTED`에서만 허용하며, null로 보낸 필드는 변경하지 않는다.
+            `PENDING` 또는 `REJECTED`에서만 허용하며, **null로 보낸 필드는 변경하지 않는다**
+            (PUT이지만 전체 교체가 아니라 부분 수정이다 — Gateway CORS 제약으로 PATCH를 쓸 수 없다).
 
             **`REJECTED` 로트를 수정하면 `PENDING`으로 자동 리셋**되고
             `reviewerId`·`reviewedAt`·`rejectionReason`이 초기화되어 재승인 대상이 된다.
 
-            중간기업의 설명 보정은 이 API가 아니라 `PATCH /{id}/description`이다.
+            중간기업의 설명 보정은 이 API가 아니라 `PUT /{id}/description`이다.
             """)
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "수정 성공. REJECTED였다면 PENDING으로 리셋된다"),
@@ -225,7 +237,7 @@ public class CourseController {
             @ApiResponse(responseCode = "403", description = "본인이 등록한 로트가 아님"),
             @ApiResponse(responseCode = "404", description = "없는 로트")
     })
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<CourseDto.ApiResponse<CourseDto.MaterialLotResponse>> updateCourse(
             @Parameter(description = "판매 로트 ID", example = "10") @PathVariable Long id,
             @Valid @RequestBody CourseDto.UpdateRequest request,
@@ -251,7 +263,7 @@ public class CourseController {
             @ApiResponse(responseCode = "403", description = "본인이 등록한 로트가 아님"),
             @ApiResponse(responseCode = "404", description = "없는 로트")
     })
-    @PatchMapping("/{id}/withdraw")
+    @PutMapping("/{id}/withdraw")
     public ResponseEntity<CourseDto.ApiResponse<CourseDto.MaterialLotResponse>> withdrawCourse(
             @Parameter(description = "판매 로트 ID", example = "10") @PathVariable Long id,
             @Parameter(description = "Gateway가 주입하는 공급기업 ID", required = true, example = "2")
@@ -284,7 +296,7 @@ public class CourseController {
             @ApiResponse(responseCode = "403", description = "중간기업(`companyType=INTERMEDIARY`)이 아님"),
             @ApiResponse(responseCode = "404", description = "없는 로트")
     })
-    @PatchMapping("/{id}/approval")
+    @PutMapping("/{id}/approval")
     public ResponseEntity<CourseDto.ApiResponse<CourseDto.MaterialLotResponse>> decideApproval(
             @Parameter(description = "판매 로트 ID", example = "10") @PathVariable Long id,
             @Valid @RequestBody CourseDto.ApprovalRequest request,
@@ -306,10 +318,10 @@ public class CourseController {
             **승인 절차가 아니라 검토 행위의 일부**이므로
             `status`·`reviewerId`·`reviewedAt`·`rejectionReason`을 건드리지 않는다.
             `PENDING` 로트는 `PENDING`으로, `APPROVED` 로트는 `APPROVED`로 남는다.
-            승인 여부 변경은 `PATCH /{id}/approval`로만 한다.
+            승인 여부 변경은 `PUT /{id}/approval`로만 한다.
 
-            인가 기준이 `PATCH /{id}`와 다르다. 이쪽은 **소유권이 아니라 역할**(`companyType=INTERMEDIARY`)로
-            판정하므로, 공급기업이 자기 로트에 호출해도 403이다. 전체 수정은 `PATCH /{id}`를 쓴다.
+            인가 기준이 `PUT /{id}`와 다르다. 이쪽은 **소유권이 아니라 역할**(`companyType=INTERMEDIARY`)로
+            판정하므로, 공급기업이 자기 로트에 호출해도 403이다. 전체 수정은 `PUT /{id}`를 쓴다.
             """)
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "보정 성공. 상태와 검토 기록은 변하지 않는다"),
@@ -317,7 +329,7 @@ public class CourseController {
             @ApiResponse(responseCode = "403", description = "중간기업이 아님 (공급기업·구매기업 모두 포함)"),
             @ApiResponse(responseCode = "404", description = "없는 로트")
     })
-    @PatchMapping("/{id}/description")
+    @PutMapping("/{id}/description")
     public ResponseEntity<CourseDto.ApiResponse<CourseDto.MaterialLotResponse>> updateDescription(
             @Parameter(description = "판매 로트 ID", example = "10") @PathVariable Long id,
             @Valid @RequestBody CourseDto.DescriptionUpdateRequest request,
