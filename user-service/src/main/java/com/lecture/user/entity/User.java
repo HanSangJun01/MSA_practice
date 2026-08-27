@@ -27,12 +27,19 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    // 기업명으로 사용 (별도 companyName 필드를 만들지 않는다)
     @Column(nullable = false)
     private String name;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
+
+    // 비즈니스 기업 유형
+    // Auth Server 이미지가 같은 users 테이블을 사용하므로 nullable 로 둔다
+    @Enumerated(EnumType.STRING)
+    @Column(name = "company_type")
+    private CompanyType companyType;
 
     @CreatedDate
     @Column(updatable = false)
@@ -41,7 +48,14 @@ public class User {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
+    // 인증 서버 호환 역할 (SUPPLIER/BUYER/INTERMEDIARY 를 여기 넣지 않는다)
     public enum Role {
         STUDENT, INSTRUCTOR
+    }
+
+    // 순환거래 기업 유형
+    // STUDENT + BUYER = 구매기업, INSTRUCTOR + SUPPLIER = 공급기업, INSTRUCTOR + INTERMEDIARY = 중간 승인기업
+    public enum CompanyType {
+        BUYER, SUPPLIER, INTERMEDIARY
     }
 }
