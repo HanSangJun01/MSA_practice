@@ -7,15 +7,15 @@
           <div class="sidebar-label">메뉴</div>
 
           <router-link to="/courses" class="sidebar-item">
-            <span class="si-icon">📚</span> 강의 목록
+            <span class="si-icon">🔩</span> 산업 부산물 목록
           </router-link>
 
           <router-link
-            v-if="!isInstructor"
+            v-if="!isSupplier"
             to="/enrollments"
             class="sidebar-item active"
           >
-            <span class="si-icon">✅</span> 내 수강 목록
+            <span class="si-icon">✅</span> 내 구매 목록
           </router-link>
 
           <router-link to="/mypage" class="sidebar-item">
@@ -35,7 +35,7 @@
       </aside>
 
       <main class="main-content">
-        <h1 class="page-title">내 수강 목록</h1>
+        <h1 class="page-title">내 구매 목록</h1>
 
         <div v-if="loading" class="loading-center">
           <div class="spinner"></div>
@@ -43,16 +43,26 @@
 
         <div v-else-if="enrollments.length" class="enrollment-list fade-in">
           <div v-for="item in enrollments" :key="item.id" class="enrollment-card">
-            <div class="enroll-thumb" :class="getThumbBg(item.course?.category)">
-              <img :src="getThumbSrc(item.course)" :alt="item.course?.title" />
+            <div class="enroll-thumb thumb-industrial">
+              <img
+                v-if="getCategoryImage(materialOf(item).category)"
+                :src="getCategoryImage(materialOf(item).category)"
+                :alt="getCategoryLabel(materialOf(item).category)"
+                class="thumb-photo"
+              />
             </div>
 
             <div class="enroll-info">
-              <span class="badge" :class="getBadge(item.course?.category)">
-                {{ item.course?.category }}
+              <span class="badge badge-accent">
+                {{ getCategoryLabel(materialOf(item).category) }}
               </span>
-              <h3 class="enroll-title">{{ item.course?.title }}</h3>
-              <p class="enroll-instructor">강사: {{ item.course?.instructorName }}</p>
+              <h3 class="enroll-title">{{ materialOf(item).title }}</h3>
+              <p class="enroll-instructor">공급기업: {{ materialOf(item).supplierName }}</p>
+              <p class="enroll-price">
+                ₩{{ Number(materialOf(item).price ?? 0).toLocaleString() }}
+                <span v-if="materialOf(item).quantity">· 수량 {{ materialOf(item).quantity }}</span>
+                <span v-if="materialOf(item).region">· {{ materialOf(item).region }}</span>
+              </p>
             </div>
 
             <div class="enroll-status">
@@ -62,10 +72,10 @@
                   item.status === 'ACTIVE' ? 'status-active' : 'status-pending'
                 ]"
               >
-                {{ item.status === 'ACTIVE' ? '수강 중' : '대기 중' }}
+                {{ item.status === 'ACTIVE' ? '계약 완료' : '계약 대기' }}
               </span>
-              <router-link :to="`/courses/${item.courseId}`" class="btn btn-ghost btn-sm">
-                강의 보기
+              <router-link :to="`/courses/${item.materialLotId ?? item.courseId}`" class="btn btn-ghost btn-sm">
+                원료 보기
               </router-link>
             </div>
           </div>
@@ -73,9 +83,9 @@
 
         <div v-else class="empty-state">
           <p class="empty-icon">📭</p>
-          <p>수강 중인 강의가 없습니다.</p>
+          <p>구매한 원료가 없습니다.</p>
           <router-link to="/courses" class="btn btn-primary" style="margin-top:16px;">
-            강의 둘러보기
+            원료 둘러보기
           </router-link>
         </div>
       </main>
@@ -89,6 +99,21 @@ import { useRouter } from 'vue-router'
 import AppHeader from '@/components/AppHeader.vue'
 import { enrollmentApi } from '@/api/enrollment.js'
 import { useAuthStore } from '@/store/auth.js'
+import { getCategoryLabel } from '@/constants/category.js'
+import { getCategoryImage } from '@/constants/categoryImage.js'
+
+// material 필드가 없으면 예전 course 필드로 폴백한다
+function materialOf(item) {
+  const m = item.material ?? item.course ?? {}
+  return {
+    category: m.category,
+    title: m.title,
+    supplierName: m.supplierName ?? m.instructorName,
+    price: m.price,
+    quantity: m.quantity,
+    region: m.region
+  }
+}
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -96,33 +121,8 @@ const auth = useAuthStore()
 const enrollments = ref([])
 const loading = ref(true)
 
-const isInstructor = computed(() => auth.user?.role === 'INSTRUCTOR')
-
-const categoryConfig = {
-  '백엔드': { bg: 'thumb-teal', badge: 'badge-teal', thumb: 'spring_boot' },
-  '프론트엔드': { bg: 'thumb-teal', badge: 'badge-teal', thumb: 'vue_js' },
-  'DevOps': { bg: 'thumb-blue', badge: 'badge-blue', thumb: 'kubernetes' },
-  '데이터': { bg: 'thumb-purple', badge: 'badge-purple', thumb: 'python' },
-  'AI': { bg: 'thumb-pink', badge: 'badge-pink', thumb: 'generative_ai' },
-}
-
-function getThumbBg(cat) {
-  return categoryConfig[cat]?.bg || 'thumb-gray'
-}
-
-function getBadge(cat) {
-  return categoryConfig[cat]?.badge || 'badge-gray'
-}
-
-function getThumbSrc(course) {
-  const key = course?.thumbnail || categoryConfig[course?.category]?.thumb
-  if (!key) return ''
-  try {
-    return new URL(`../assets/images/courses/${key}.png`, import.meta.url).href
-  } catch {
-    return ''
-  }
-}
+// role(INSTRUCTOR)은 공급기업/중간기업이 공유하므로 companyType으로 공급기업만 구분한다
+const isSupplier = computed(() => auth.user?.companyType === 'SUPPLIER')
 
 function handleLogout() {
   auth.logout()
@@ -130,9 +130,9 @@ function handleLogout() {
 }
 
 onMounted(async () => {
-  // 강사는 이 페이지 접근 불가 → 마이페이지로 이동
-  if (isInstructor.value) {
-    console.warn('[EnrollmentView] instructor tried to access /enrollments, redirect to /mypage')
+  // 공급기업은 이 페이지 접근 불가 → 마이페이지로 이동
+  if (isSupplier.value) {
+    console.warn('[EnrollmentView] supplier tried to access /enrollments, redirect to /mypage')
     router.replace('/mypage')
     return
   }
@@ -218,8 +218,8 @@ onMounted(async () => {
 }
 
 .sidebar-item.active {
-  background: var(--color-primary-light);
-  color: var(--color-primary);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
   font-weight: 500;
 }
 
@@ -259,41 +259,17 @@ onMounted(async () => {
 }
 
 .enroll-thumb {
-  width: 72px;
-  height: 72px;
+  width: 76px;
+  height: 76px;
   border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   flex-shrink: 0;
   overflow: hidden;
 }
 
-.enroll-thumb img {
+.thumb-photo {
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  padding: 8px;
-}
-
-.thumb-teal {
-  background: #E1F5EE;
-}
-
-.thumb-blue {
-  background: #E6F1FB;
-}
-
-.thumb-purple {
-  background: #EEEDFE;
-}
-
-.thumb-pink {
-  background: #FBEAF0;
-}
-
-.thumb-gray {
-  background: #F1EFE8;
+  object-fit: cover;
 }
 
 .enroll-info {
@@ -304,13 +280,24 @@ onMounted(async () => {
 }
 
 .enroll-title {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
 }
 
 .enroll-instructor {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--color-text-secondary);
+}
+
+.enroll-price {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-brand-green-deep);
+}
+
+.enroll-price span {
+  font-weight: 400;
+  color: var(--color-text-muted);
 }
 
 .enroll-status {
@@ -328,13 +315,13 @@ onMounted(async () => {
 }
 
 .status-active {
-  background: #E1F5EE;
-  color: #0F6E56;
+  background: var(--color-brand-green-soft);
+  color: var(--color-brand-green-deep);
 }
 
 .status-pending {
-  background: #FAEEDA;
-  color: #854F0B;
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-tertiary);
 }
 
 .btn-sm {
@@ -363,7 +350,7 @@ onMounted(async () => {
   width: 36px;
   height: 36px;
   border: 3px solid var(--color-border);
-  border-top-color: var(--color-primary);
+  border-top-color: var(--color-brand-green);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }

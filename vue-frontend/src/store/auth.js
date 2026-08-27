@@ -9,7 +9,8 @@ export const useAuthStore = defineStore('auth', () => {
   const user = ref(JSON.parse(sessionStorage.getItem('user') || 'null'))
 
   const isAuthenticated = computed(() => !!accessToken.value)
-  const isInstructor = computed(() => user.value?.role === 'INSTRUCTOR')
+  // role(INSTRUCTOR)은 공급기업/중간기업이 공유하므로 companyType으로 공급기업만 구분한다
+  const isInstructor = computed(() => user.value?.companyType === 'SUPPLIER')
 
   function setToken(token) {
     accessToken.value = token

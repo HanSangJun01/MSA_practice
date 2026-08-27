@@ -3,14 +3,14 @@
     <div class="header-inner">
       <!-- 로고 -->
       <router-link to="/" class="logo">
-        <img src="@/assets/images/logo/main_logo.png" alt="LearnNexus" class="logo-img" />
-        <span class="logo-text">LearnNexus</span>
+        <img src="@/assets/images/logo/elemento_logo.png" alt="Elemento" class="logo-img" />
+        <span class="logo-text">Elemento</span>
       </router-link>
 
       <!-- 네비게이션 -->
       <nav class="nav-links" v-if="auth.isAuthenticated">
-        <router-link to="/courses" class="nav-link" :class="{ active: $route.path.startsWith('/courses') }">강의</router-link>
-        <router-link to="/enrollments" class="nav-link" :class="{ active: $route.path === '/enrollments' }">내 학습</router-link>
+        <router-link to="/courses" class="nav-link" :class="{ active: $route.path.startsWith('/courses') }">원료</router-link>
+        <router-link to="/enrollments" class="nav-link" :class="{ active: $route.path === '/enrollments' }">내 구매</router-link>
       </nav>
 
       <!-- 우측 액션 -->
@@ -86,16 +86,16 @@ function handleLogout() {
 }
 .nav-link {
   padding: 6px 14px;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   font-size: 14px;
   font-weight: 500;
-  color: var(--color-text-secondary);
+  color: var(--color-text-tertiary);
   transition: var(--transition);
 }
 .nav-link:hover,
 .nav-link.active {
-  color: var(--color-primary);
-  background: var(--color-primary-light);
+  color: var(--color-text-primary);
+  background: var(--color-brand-green-soft);
 }
 .header-actions {
   display: flex;
@@ -111,8 +111,8 @@ function handleLogout() {
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: var(--color-primary-light);
-  color: var(--color-primary);
+  background: var(--color-brand-green-soft);
+  color: var(--color-brand-green-deep);
   font-size: 13px;
   font-weight: 600;
   display: flex;
@@ -122,7 +122,7 @@ function handleLogout() {
   transition: var(--transition);
 }
 .user-avatar:hover {
-  background: var(--color-primary);
-  color: #fff;
+  background: var(--color-brand-green);
+  color: #06120F;
 }
 </style>
