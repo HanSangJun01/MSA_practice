@@ -22,13 +22,16 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // 구매기업 ID (내부 필드명은 기존 계약을 유지한다)
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
+    // 판매 로트 ID (내부 필드명은 기존 계약을 유지한다)
     @Column(name = "course_id", nullable = false)
     private Long courseId;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    // 로트 총가격 (B2B 금액이므로 DECIMAL(18,2))
+    @Column(nullable = false, precision = 18, scale = 2)
     private BigDecimal amount;
 
     @Enumerated(EnumType.STRING)

@@ -17,7 +17,9 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     /**
-     * 회원가입
+     * 기업 회원가입
+     * - role 은 인증 서버 호환을 위해 STUDENT | INSTRUCTOR 를 유지한다
+     * - 기업 구분은 companyType 으로 저장한다
      */
     @Transactional
     public UserDto.UserResponse register(UserDto.RegisterRequest request) {
@@ -26,16 +28,44 @@ public class UserService {
         }
 
         User.Role role = request.getRole() != null ? request.getRole() : User.Role.STUDENT;
+        User.CompanyType companyType = resolveCompanyType(role, request.getCompanyType());
 
         User user = User.builder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .name(request.getName())
                 .role(role)
+                .companyType(companyType)
                 .build();
 
         User savedUser = userRepository.save(user);
         return UserDto.UserResponse.from(savedUser);
+    }
+
+    /**
+     * role 과 companyType 조합 검증
+     * - STUDENT      + BUYER                    = 구매기업
+     * - INSTRUCTOR   + SUPPLIER | INTERMEDIARY  = 공급기업 | 중간 승인기업
+     * - companyType 생략 시 role 로부터 기본값을 유추한다
+     */
+    private User.CompanyType resolveCompanyType(User.Role role, User.CompanyType requested) {
+        if (requested == null) {
+            return role == User.Role.INSTRUCTOR
+                    ? User.CompanyType.SUPPLIER
+                    : User.CompanyType.BUYER;
+        }
+
+        boolean valid = switch (requested) {
+            case BUYER -> role == User.Role.STUDENT;
+            case SUPPLIER, INTERMEDIARY -> role == User.Role.INSTRUCTOR;
+        };
+
+        if (!valid) {
+            throw new IllegalArgumentException(
+                    "role 과 companyType 조합이 올바르지 않습니다: role=" + role + ", companyType=" + requested
+                            + " (STUDENT+BUYER, INSTRUCTOR+SUPPLIER, INSTRUCTOR+INTERMEDIARY 만 허용)");
+        }
+        return requested;
     }
 
     /**
