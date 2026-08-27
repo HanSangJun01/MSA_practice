@@ -10,8 +10,8 @@
           <h1 class="hero-title">부산물을 보지 마세요, <br>성분을 보세요</h1>
           <p class="hero-desc"> 공장과 공장을 잇는 가장 스마트한 원소 매칭 시스템 </p>
           <div class="hero-actions">
-            <router-link to="/login" class="btn btn-accent-green btn-lg">Elemento Logging</router-link>
-            <router-link to="/courses" class="btn btn-on-dark-outline btn-lg">Elemento Match</router-link>
+            <router-link to="/login" class="btn btn-accent-green btn-lg">무료로 시작하기</router-link>
+            <router-link to="/courses" class="btn btn-on-dark-outline btn-lg">원료 둘러보기</router-link>
           </div>
           <div class="hero-stats">
             <div class="stat"><span class="stat-num">1,200+</span><span class="stat-label">등록 원료</span></div>
@@ -77,8 +77,8 @@
     <footer class="footer">
       <div class="footer-inner">
         <div class="footer-logo">
-          <img src="@/assets/images/logo/elemento_logo.png" alt="LearnNexus" />
-          <span>LearnNexus</span>
+          <img src="@/assets/images/logo/elemento_logo.png" alt="Elemento" />
+          <span>Elemento</span>
         </div>
         <p class="footer-copy">© 2026 Elemento. All rights reserved.</p>
       </div>
