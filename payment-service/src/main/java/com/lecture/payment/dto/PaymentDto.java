@@ -1,6 +1,7 @@
 package com.lecture.payment.dto;
 
 import com.lecture.payment.entity.Payment;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.*;
@@ -33,8 +34,14 @@ public class PaymentDto {
     @AllArgsConstructor
     @Builder
     public static class InternalPaymentRequest {
+
+        @Schema(description = "구매기업 ID (내부 필드명 유지)", example = "3")
         private Long userId;
+
+        @Schema(description = "판매 로트 ID (내부 필드명 유지)", example = "10")
         private Long courseId;
+
+        @Schema(description = "로트 총가격. 하드코딩 금액을 보내지 않는다", example = "12000000")
         private BigDecimal amount;
     }
 
@@ -45,8 +52,14 @@ public class PaymentDto {
     @Builder
     public static class PaymentResponse {
         private Long paymentId;
+
+        @Schema(description = "구매기업 ID (내부 필드명 userId)", example = "3")
         private Long buyerId;
+
+        @Schema(description = "판매 로트 ID (내부 필드명 courseId)", example = "10")
         private Long materialLotId;
+
+        @Schema(description = "로트 총가격", example = "12000000")
         private BigDecimal amount;
         private Payment.Status status;
         private String transactionId;
