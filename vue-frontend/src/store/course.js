@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { courseApi } from '@/api/course.js'
+import { CATEGORY_LABELS, getCategoryLabel } from '@/constants/category.js'
 
 export const useCourseStore = defineStore('course', () => {
   const courses = ref([])
@@ -9,58 +10,15 @@ export const useCourseStore = defineStore('course', () => {
   const error = ref(null)
   const selectedCategory = ref('전체')
 
-  const categories = ['전체', '폐건전지', '폐수슬러지', '제철슬래그', '폐합성수지', '스크랩금속', '식품부산물']
-
-  // 백엔드 카테고리 → 프론트 표시용 카테고리
-  const categoryLabelMap = {
-    WASTE_BATTERY: '폐건전지',
-    WASTEWATER_SLUDGE: '폐수슬러지',
-    STEEL_SLAG: '제철슬래그',
-    WASTE_PLASTIC: '폐합성수지',
-    SCRAP_METAL: '스크랩금속',
-    FOOD_BYPRODUCT: '식품부산물'
-  }
-
-  // 썸네일 이미지 매핑 (실제 부산물 이미지 준비 전까지 임시 아이콘 재사용)
-  const thumbnailMap = {
-    SPRING: new URL('../assets/images/courses/spring_boot.png', import.meta.url).href,
-    VUE: new URL('../assets/images/courses/vue_js.png', import.meta.url).href,
-    DOCKER: new URL('../assets/images/courses/docker.png', import.meta.url).href,
-    KUBERNETES: new URL('../assets/images/courses/kubernetes.png', import.meta.url).href,
-    PYTHON: new URL('../assets/images/courses/python.png', import.meta.url).href,
-    AI: new URL('../assets/images/courses/generative_ai.png', import.meta.url).href,
-  }
-
-  const categoryThumbnailMap = {
-    '폐건전지': thumbnailMap.KUBERNETES,
-    '폐수슬러지': thumbnailMap.DOCKER,
-    '제철슬래그': thumbnailMap.SPRING,
-    '폐합성수지': thumbnailMap.PYTHON,
-    '스크랩금속': thumbnailMap.VUE,
-    '식품부산물': thumbnailMap.AI
-  }
-
-  function normalizeCategory(category) {
-    if (!category) return ''
-    return categoryLabelMap[category] || category
-  }
+  const categories = ['전체', ...Object.values(CATEGORY_LABELS)]
 
   function normalizeCourse(course) {
     if (!course || typeof course !== 'object') return course
 
     return {
       ...course,
-      category: normalizeCategory(course.category)
+      category: getCategoryLabel(course.category)
     }
-  }
-
-  function getThumbnail(course) {
-    const thumbKey = course?.thumbnail?.toUpperCase?.() || ''
-    if (thumbKey && thumbnailMap[thumbKey]) {
-      return thumbnailMap[thumbKey]
-    }
-
-    return categoryThumbnailMap[course?.category] || null
   }
 
   async function fetchCourses() {
@@ -125,11 +83,7 @@ export const useCourseStore = defineStore('course', () => {
     error,
     categories,
     selectedCategory,
-    thumbnailMap,
-    categoryLabelMap,
-    normalizeCategory,
     normalizeCourse,
-    getThumbnail,
     fetchCourses,
     fetchCourse,
     setCategory

@@ -95,7 +95,7 @@ function handleLogout() {
 .nav-link:hover,
 .nav-link.active {
   color: var(--color-text-primary);
-  background: var(--color-bg-tertiary);
+  background: var(--color-brand-green-soft);
 }
 .header-actions {
   display: flex;

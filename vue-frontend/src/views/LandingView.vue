@@ -34,11 +34,11 @@
         </div>
         <div class="course-grid">
           <div v-for="course in featuredCourses" :key="course.id" class="course-card-landing">
-            <div class="card-thumb" :class="course.thumbBg">
-              <img :src="course.thumbSrc" :alt="course.title" class="thumb-img" />
+            <div class="card-thumb thumb-industrial">
+              <MaterialIcon :category="course.category" class="thumb-icon" />
             </div>
             <div class="card-body">
-              <span class="badge" :class="course.badgeClass">{{ course.category }}</span>
+              <span class="badge badge-accent">{{ getCategoryLabel(course.category) }}</span>
               <h3 class="card-title">{{ course.title }}</h3>
               <div class="card-meta">
                 <span class="instructor">{{ course.supplier }}</span>
@@ -88,21 +88,16 @@
 
 <script setup>
 import AppHeader from '@/components/AppHeader.vue'
-
-import springImg   from '@/assets/images/courses/spring_boot.png'
-import vueImg      from '@/assets/images/courses/vue_js.png'
-import k8sImg      from '@/assets/images/courses/kubernetes.png'
-import dockerImg   from '@/assets/images/courses/docker.png'
-import pythonImg   from '@/assets/images/courses/python.png'
-import genaiImg    from '@/assets/images/courses/generative_ai.png'
+import MaterialIcon from '@/components/MaterialIcon.vue'
+import { getCategoryLabel } from '@/constants/category.js'
 
 const featuredCourses = [
-  { id:1, title:'리튬이온 배터리 블랙매스', category:'폐건전지',   supplier:'리커버메탈',   price:'₩1,200,000', thumbSrc: k8sImg,    thumbBg:'thumb-blue',   badgeClass:'badge-blue'   },
-  { id:2, title:'반도체 폐수슬러지 (CaF₂)', category:'폐수슬러지', supplier:'케미리사이클', price:'협의',        thumbSrc: dockerImg, thumbBg:'thumb-gray',   badgeClass:'badge-gray'   },
-  { id:3, title:'제철소 고로 슬래그',       category:'제철슬래그', supplier:'스틸사이클',   price:'협의',        thumbSrc: springImg, thumbBg:'thumb-orange', badgeClass:'badge-orange' },
-  { id:4, title:'폐합성수지 열분해유 원료', category:'폐합성수지', supplier:'리사이클텍',   price:'₩620,000',   thumbSrc: pythonImg, thumbBg:'thumb-amber',  badgeClass:'badge-amber'  },
-  { id:5, title:'구리 스크랩·동선',         category:'스크랩금속', supplier:'메탈리커버리', price:'₩1,050,000', thumbSrc: vueImg,    thumbBg:'thumb-blue',   badgeClass:'badge-blue'   },
-  { id:6, title:'수산 가공 부산물 (콜라겐 원료)', category:'식품부산물', supplier:'크래프트바이오', price:'₩180,000', thumbSrc: genaiImg,  thumbBg:'thumb-green',  badgeClass:'badge-green'  },
+  { id:1, title:'리튬이온 배터리 블랙매스', category:'BATTERY',     supplier:'리커버메탈',   price:'₩1,200,000' },
+  { id:2, title:'반도체 폐수슬러지 (CaF₂)', category:'CHEMICAL',    supplier:'케미리사이클', price:'협의' },
+  { id:3, title:'제철소 고로 슬래그',       category:'CONSTRUCTION',supplier:'스틸사이클',   price:'협의' },
+  { id:4, title:'폐합성수지 열분해유 원료', category:'PLASTIC',     supplier:'리사이클텍',   price:'₩620,000' },
+  { id:5, title:'구리 스크랩·동선',         category:'METAL',       supplier:'메탈리커버리', price:'₩1,050,000' },
+  { id:6, title:'폐가전 인쇄회로기판(PCB) 스크랩', category:'ELECTRONIC', supplier:'이웨이스트코리아', price:'₩450,000' },
 ]
 
 const features = [
@@ -142,7 +137,7 @@ const features = [
   margin-bottom: 16px;
 }
 .hero-title {
-  font-size: 42px;
+  font-size: 45px;
   font-weight: 700;
   line-height: 1.25;
   letter-spacing: -0.5px;
@@ -150,7 +145,7 @@ const features = [
   margin-bottom: 16px;
 }
 .hero-desc {
-  font-size: 16px;
+  font-size: 17px;
   color: var(--color-on-dark-muted);
   line-height: 1.7;
   max-width: 460px;
@@ -187,8 +182,8 @@ const features = [
   gap: 36px;
 }
 .stat { display: flex; flex-direction: column; gap: 2px; }
-.stat-num { font-size: 22px; font-weight: 700; color: var(--color-brand-green); }
-.stat-label { font-size: 12px; color: var(--color-on-dark-muted); }
+.stat-num { font-size: 24px; font-weight: 700; color: var(--color-brand-green); }
+.stat-label { font-size: 13px; color: var(--color-on-dark-muted); }
 .hero-visual {
   display: flex;
   align-items: center;
@@ -209,7 +204,7 @@ const features = [
   align-items: center;
   margin-bottom: 24px;
 }
-.section-title { font-size: 22px; font-weight: 700; color: var(--color-text-primary); }
+.section-title { font-size: 24px; font-weight: 700; color: var(--color-text-primary); }
 .section-title.center { text-align: center; margin-bottom: 40px; }
 .section-link { font-size: 14px; color: var(--color-primary); font-weight: 500; }
 .section-link:hover { text-decoration: underline; }
@@ -231,23 +226,15 @@ const features = [
   box-shadow: var(--shadow-md);
 }
 .card-thumb {
-  height: 110px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  height: 150px;
   overflow: hidden;
 }
-.thumb-green  { background: var(--color-brand-green-soft); }
-.thumb-blue   { background: rgba(55, 114, 207, 0.12); }
-.thumb-orange { background: rgba(242, 104, 60, 0.12); }
-.thumb-amber  { background: rgba(217, 119, 6, 0.12); }
-.thumb-gray   { background: var(--color-bg-tertiary); }
-.thumb-img { width: 100%; height: 100%; object-fit: contain; padding: 14px; }
-.card-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
-.card-title { font-size: 14px; font-weight: 600; color: var(--color-text-primary); line-height: 1.4; }
+.thumb-icon { width: 52px; height: 52px; }
+.card-body { padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 9px; }
+.card-title { font-size: 16px; font-weight: 600; color: var(--color-text-primary); line-height: 1.4; }
 .card-meta { display: flex; justify-content: space-between; align-items: center; }
-.instructor { font-size: 12px; color: var(--color-text-secondary); }
-.price { font-size: 14px; font-weight: 600; color: var(--color-primary); }
+.instructor { font-size: 13px; color: var(--color-text-secondary); }
+.price { font-size: 15px; font-weight: 700; color: var(--color-text-primary); }
 
 /* 특징 */
 .features-section { padding: 64px 0; background: var(--color-bg-primary); }
@@ -266,8 +253,8 @@ const features = [
 }
 .feature-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
 .feature-icon { font-size: 32px; margin-bottom: 12px; }
-.feature-title { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
-.feature-desc { font-size: 13px; color: var(--color-text-secondary); line-height: 1.6; }
+.feature-title { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+.feature-desc { font-size: 14px; color: var(--color-text-secondary); line-height: 1.6; }
 
 /* CTA — promo-banner 패턴 (canvas-dark 배경 + on-dark 텍스트 + on-dark 화이트 필 버튼) */
 .cta-section {

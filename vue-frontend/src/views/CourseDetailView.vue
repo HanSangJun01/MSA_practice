@@ -7,22 +7,40 @@
         <div class="detail-hero-inner">
           <!-- 좌측 상세 정보 -->
           <div class="detail-info fade-in-up">
-            <span class="badge" :class="badgeClass">{{ displayCategory }}</span>
+            <div class="badge-row">
+              <span class="badge badge-accent">{{ displayCategory }}</span>
+              <span v-if="course.status && course.status !== 'APPROVED'" class="badge" :class="statusBadgeClass">
+                {{ statusLabel }}
+              </span>
+            </div>
             <h1 class="detail-title">{{ course.title }}</h1>
             <p class="detail-desc">
               {{ course.description || '제3자 품질 검증을 거친 산업 부산물 원료입니다. 성분표와 함량을 확인하세요.' }}
             </p>
 
+            <p v-if="course.status === 'REJECTED' && course.rejectionReason" class="rejection-reason">
+              거절 사유: {{ course.rejectionReason }}
+            </p>
+
             <div class="detail-meta">
               <span>공급기업: {{ displayInstructorName }}</span>
               <span>계약: {{ displayEnrollmentCount }}건</span>
+              <span v-if="course.quantity">수량: {{ course.quantity.toLocaleString() }}</span>
+              <span v-if="course.region">지역: {{ course.region }}</span>
+              <span v-if="displayCreatedAt">등록일: {{ displayCreatedAt }}</span>
+            </div>
+
+            <div v-if="components.length" class="component-list">
+              <span v-for="c in components" :key="c.name" class="component-chip">
+                {{ getComponentLabel(c.name) }} {{ c.percentage }}%
+              </span>
             </div>
           </div>
 
           <!-- 우측 결제/수강 카드 -->
           <div class="enroll-card fade-in">
-            <div class="enroll-thumb" :class="thumbBg">
-              <img v-if="thumbSrc" :src="thumbSrc" :alt="course.title" />
+            <div class="enroll-thumb thumb-industrial">
+              <MaterialIcon :category="course.category" class="thumb-icon" />
             </div>
 
             <div class="enroll-body">
@@ -69,9 +87,13 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppHeader from '@/components/AppHeader.vue'
+import MaterialIcon from '@/components/MaterialIcon.vue'
 import { useCourseStore } from '@/store/course.js'
 import { enrollmentApi } from '@/api/enrollment.js'
 import { useAuthStore } from '@/store/auth.js'
+import { getCategoryLabel } from '@/constants/category.js'
+import { getComponentLabel } from '@/constants/materialComponent.js'
+import { getLotStatusLabel, getLotStatusBadge } from '@/constants/lotStatus.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -86,23 +108,11 @@ const course = computed(() => courseStore.selectedCourse)
 const loading = computed(() => courseStore.loading)
 const isInstructor = computed(() => auth.user?.role === 'INSTRUCTOR')
 
-const categoryConfig = {
-  '폐건전지': { badge: 'badge-blue', bg: 'thumb-blue', thumb: 'kubernetes' },
-  '폐수슬러지': { badge: 'badge-gray', bg: 'thumb-gray', thumb: 'docker' },
-  '제철슬래그': { badge: 'badge-orange', bg: 'thumb-orange', thumb: 'spring_boot' },
-  '폐합성수지': { badge: 'badge-amber', bg: 'thumb-amber', thumb: 'python' },
-  '스크랩금속': { badge: 'badge-blue', bg: 'thumb-blue', thumb: 'vue_js' },
-  '식품부산물': { badge: 'badge-green', bg: 'thumb-green', thumb: 'generative_ai' },
-}
-
-const config = computed(() => categoryConfig[course.value?.category] || {})
-const badgeClass = computed(() => config.value.badge || 'badge-gray')
-const thumbBg = computed(() => config.value.bg || 'thumb-gray')
-
-const displayCategory = computed(() => course.value?.category || '-')
+const displayCategory = computed(() => getCategoryLabel(course.value?.category) || '-')
 
 const displayInstructorName = computed(() => {
   return (
+    course.value?.supplierName ||
     course.value?.instructorName ||
     course.value?.teacherName ||
     course.value?.instructor?.name ||
@@ -114,6 +124,7 @@ const displayInstructorName = computed(() => {
 
 const displayEnrollmentCount = computed(() => {
   const value = Number(
+    course.value?.contractCount ??
     course.value?.enrollmentCount ??
     course.value?.enrollment_count ??
     0
@@ -121,20 +132,19 @@ const displayEnrollmentCount = computed(() => {
   return Number.isNaN(value) ? 0 : value.toLocaleString()
 })
 
+const components = computed(() => course.value?.components ?? [])
+
+const displayCreatedAt = computed(() => {
+  if (!course.value?.createdAt) return ''
+  return new Date(course.value.createdAt).toLocaleDateString('ko-KR')
+})
+
+const statusLabel = computed(() => getLotStatusLabel(course.value?.status))
+const statusBadgeClass = computed(() => getLotStatusBadge(course.value?.status))
+
 const displayPrice = computed(() => {
   const value = Number(course.value?.price ?? 0)
   return Number.isNaN(value) ? '0' : value.toLocaleString()
-})
-
-const thumbSrc = computed(() => {
-  const key = course.value?.thumbnail || config.value.thumb
-  if (!key) return null
-
-  try {
-    return new URL(`../assets/images/courses/${key}.png`, import.meta.url).href
-  } catch {
-    return null
-  }
 })
 
 const buttonLabel = computed(() => {
@@ -183,7 +193,9 @@ async function loadEnrollmentStatus() {
         ? res.data
         : []
 
-    const matched = enrollments.find(item => Number(item.courseId) === Number(course.value.id))
+    const matched = enrollments.find(
+      item => Number(item.materialLotId ?? item.courseId) === Number(course.value.id)
+    )
 
     if (!matched) {
       enrollmentStatus.value = 'NONE'
@@ -278,6 +290,34 @@ watch(
   gap: 14px;
 }
 
+.badge-row {
+  display: flex;
+  gap: 8px;
+}
+
+.rejection-reason {
+  font-size: 13px;
+  color: var(--color-brand-error);
+  background: rgba(220, 38, 38, 0.08);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  width: fit-content;
+}
+
+.component-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.component-chip {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-full);
+  padding: 4px 12px;
+}
+
 .detail-title {
   font-size: 30px;
   font-weight: 700;
@@ -307,24 +347,13 @@ watch(
 }
 
 .enroll-thumb {
-  height: 160px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  height: 190px;
 }
 
-.enroll-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  padding: 20px;
+.thumb-icon {
+  width: 64px;
+  height: 64px;
 }
-
-.thumb-green  { background: var(--color-brand-green-soft); }
-.thumb-blue   { background: rgba(55, 114, 207, 0.12); }
-.thumb-orange { background: rgba(242, 104, 60, 0.12); }
-.thumb-amber  { background: rgba(217, 119, 6, 0.12); }
-.thumb-gray   { background: var(--color-bg-tertiary); }
 
 .enroll-body {
   padding: 20px;
@@ -336,7 +365,7 @@ watch(
 .enroll-price {
   font-size: 26px;
   font-weight: 700;
-  color: var(--color-primary);
+  color: var(--color-brand-green-deep);
 }
 
 .btn-full {
@@ -365,9 +394,9 @@ watch(
 
 .error-msg {
   font-size: 13px;
-  color: #dc2626;
+  color: var(--color-brand-error);
   padding: 8px 12px;
-  background: #fef2f2;
+  background: rgba(220, 38, 38, 0.08);
   border-radius: var(--radius-sm);
 }
 
@@ -395,11 +424,6 @@ watch(
   border-top-color: var(--color-brand-green);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
-}
-
-.badge-gray {
-  background: #f3f4f6;
-  color: #6b7280;
 }
 
 @keyframes spin {

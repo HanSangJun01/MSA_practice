@@ -90,7 +90,7 @@
               </div>
 
               <div class="form-group">
-                <label class="form-label" for="price">가격</label>
+                <label class="form-label" for="price">로트 총가격</label>
                 <input
                   id="price"
                   v-model.number="form.price"
@@ -98,9 +98,63 @@
                   min="0"
                   step="1000"
                   class="form-input"
-                  placeholder="예: 50000"
+                  placeholder="예: 1200000"
                 />
               </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="quantity">수량</label>
+                <input
+                  id="quantity"
+                  v-model.number="form.quantity"
+                  type="number"
+                  min="0"
+                  class="form-input"
+                  placeholder="예: 5 (톤·개 등은 원료명에 표기)"
+                />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="region">공급 지역</label>
+                <input
+                  id="region"
+                  v-model.trim="form.region"
+                  type="text"
+                  class="form-input"
+                  placeholder="예: 경기 화성"
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">성분·함량</label>
+              <div class="component-rows">
+                <div v-for="(row, index) in form.components" :key="index" class="component-row">
+                  <select v-model="row.name" class="form-select">
+                    <option disabled value="">성분 선택</option>
+                    <option v-for="opt in componentOptions" :key="opt.value" :value="opt.value">
+                      {{ opt.label }}
+                    </option>
+                  </select>
+                  <input
+                    v-model.number="row.percentage"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    class="form-input"
+                    placeholder="함량 %"
+                  />
+                  <button type="button" class="component-remove" @click="removeComponentRow(index)">
+                    삭제
+                  </button>
+                </div>
+              </div>
+              <button type="button" class="btn btn-ghost add-component-btn" @click="addComponentRow">
+                + 성분 추가
+              </button>
             </div>
 
             <div v-if="validationError" class="error-box">
@@ -138,6 +192,8 @@ import { useRouter } from 'vue-router'
 import AppHeader from '@/components/AppHeader.vue'
 import { courseApi } from '@/api/course.js'
 import { useAuthStore } from '@/store/auth.js'
+import { CATEGORY_OPTIONS } from '@/constants/category.js'
+import { COMPONENT_OPTIONS } from '@/constants/materialComponent.js'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -146,7 +202,10 @@ const form = reactive({
   title: '',
   description: '',
   category: '',
-  price: null
+  price: null,
+  quantity: null,
+  region: '',
+  components: []
 })
 
 const submitting = ref(false)
@@ -154,14 +213,16 @@ const validationError = ref('')
 const submitError = ref('')
 const submitSuccess = ref('')
 
-const categoryOptions = [
-  { label: '폐건전지 (블랙매스)', value: 'WASTE_BATTERY' },
-  { label: '폐수슬러지', value: 'WASTEWATER_SLUDGE' },
-  { label: '제철소 슬래그', value: 'STEEL_SLAG' },
-  { label: '폐합성수지·폐비닐', value: 'WASTE_PLASTIC' },
-  { label: '스크랩 금속·동선', value: 'SCRAP_METAL' },
-  { label: '수산·식품 가공 부산물', value: 'FOOD_BYPRODUCT' }
-]
+const categoryOptions = CATEGORY_OPTIONS
+const componentOptions = COMPONENT_OPTIONS
+
+function addComponentRow() {
+  form.components.push({ name: '', percentage: null })
+}
+
+function removeComponentRow(index) {
+  form.components.splice(index, 1)
+}
 
 function handleLogout() {
   auth.logout()
@@ -202,6 +263,19 @@ function validateForm() {
     return false
   }
 
+  for (const row of form.components) {
+    const hasName = !!row.name
+    const hasPercentage = row.percentage !== null && row.percentage !== undefined && row.percentage !== ''
+    if (hasName !== hasPercentage) {
+      validationError.value = '성분과 함량을 모두 입력하거나, 비워서 삭제해 주세요.'
+      return false
+    }
+    if (hasPercentage && (Number(row.percentage) < 0 || Number(row.percentage) > 100)) {
+      validationError.value = '함량은 0~100 사이로 입력해 주세요.'
+      return false
+    }
+  }
+
   return true
 }
 
@@ -218,7 +292,12 @@ async function handleSubmit() {
       title: form.title,
       description: form.description,
       category: form.category,
-      price: Number(form.price)
+      price: Number(form.price),
+      quantity: form.quantity === null || form.quantity === '' ? null : Number(form.quantity),
+      region: form.region || null,
+      components: form.components
+        .filter(row => row.name && row.percentage !== null && row.percentage !== '')
+        .map(row => ({ name: row.name, percentage: Number(row.percentage) }))
     }
 
     const res = await courseApi.create(payload)
@@ -407,17 +486,48 @@ async function handleSubmit() {
   line-height: 1.5;
 }
 
+.component-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.component-row {
+  display: grid;
+  grid-template-columns: 1fr 120px auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.component-remove {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 8px;
+}
+
+.component-remove:hover {
+  color: var(--color-brand-error);
+}
+
+.add-component-btn {
+  width: fit-content;
+  margin-top: 8px;
+}
+
 .error-box {
-  background: #fef2f2;
-  color: #dc2626;
+  background: rgba(220, 38, 38, 0.08);
+  color: var(--color-brand-error);
   border-radius: var(--radius-md);
   padding: 12px 14px;
   font-size: 13px;
 }
 
 .success-box {
-  background: #ecfdf3;
-  color: #15803d;
+  background: var(--color-brand-green-soft);
+  color: var(--color-brand-green-deep);
   border-radius: var(--radius-md);
   padding: 12px 14px;
   font-size: 13px;

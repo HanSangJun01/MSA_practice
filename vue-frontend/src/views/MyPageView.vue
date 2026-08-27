@@ -114,33 +114,48 @@
                   <h4 class="course-title">{{ course.title }}</h4>
                   <p class="course-desc">{{ course.description || '설명이 없습니다.' }}</p>
                 </div>
-                <span
-                  class="status-badge"
-                  :class="course.status === 'ACTIVE' ? 'status-active' : 'status-inactive'"
-                >
-                  {{ course.status || 'UNKNOWN' }}
+                <span class="status-badge badge" :class="getLotStatusBadge(course.status)">
+                  {{ getLotStatusLabel(course.status) }}
                 </span>
               </div>
+
+              <p v-if="course.status === 'REJECTED' && course.rejectionReason" class="rejection-reason">
+                거절 사유: {{ course.rejectionReason }}
+              </p>
 
               <div class="course-meta-grid">
                 <div class="meta-box">
                   <div class="meta-label">카테고리</div>
-                  <div class="meta-value">{{ course.category || '-' }}</div>
+                  <div class="meta-value">{{ getCategoryLabel(course.category) || '-' }}</div>
                 </div>
                 <div class="meta-box">
                   <div class="meta-label">가격</div>
                   <div class="meta-value">{{ formatPrice(course.price) }}</div>
                 </div>
                 <div class="meta-box">
+                  <div class="meta-label">수량</div>
+                  <div class="meta-value">{{ course.quantity ?? '-' }}</div>
+                </div>
+                <div class="meta-box">
+                  <div class="meta-label">공급 지역</div>
+                  <div class="meta-value">{{ course.region || '-' }}</div>
+                </div>
+                <div class="meta-box">
                   <div class="meta-label">계약 기업 수</div>
                   <div class="meta-value">
-                    {{ course.enrollment_count ?? course.enrollmentCount ?? 0 }}곳
+                    {{ course.contractCount ?? course.enrollmentCount ?? 0 }}곳
                   </div>
                 </div>
                 <div class="meta-box">
                   <div class="meta-label">원료 ID</div>
                   <div class="meta-value">#{{ course.id }}</div>
                 </div>
+              </div>
+
+              <div v-if="course.components?.length" class="component-list">
+                <span v-for="c in course.components" :key="c.name" class="component-chip">
+                  {{ getComponentLabel(c.name) }} {{ c.percentage }}%
+                </span>
               </div>
 
               <div class="course-card-actions">
@@ -172,6 +187,9 @@ import CourseCard from '@/components/CourseCard.vue'
 import { useAuthStore } from '@/store/auth.js'
 import { enrollmentApi } from '@/api/enrollment.js'
 import { courseApi } from '@/api/course.js'
+import { getCategoryLabel } from '@/constants/category.js'
+import { getComponentLabel } from '@/constants/materialComponent.js'
+import { getLotStatusLabel, getLotStatusBadge } from '@/constants/lotStatus.js'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -191,7 +209,7 @@ const instructorError = ref('')
 
 const totalEnrollmentCount = computed(() =>
   myCourses.value.reduce((sum, course) => {
-    const count = Number(course.enrollment_count ?? course.enrollmentCount ?? 0)
+    const count = Number(course.contractCount ?? course.enrollmentCount ?? 0)
     return sum + (Number.isNaN(count) ? 0 : count)
   }, 0)
 )
@@ -205,20 +223,6 @@ function formatPrice(price) {
   const value = Number(price ?? 0)
   if (Number.isNaN(value)) return '-'
   return `${value.toLocaleString()}원`
-}
-
-/**
- * course 객체에서 강사 식별자 추출
- */
-function getCourseInstructorId(course) {
-  return (
-    course.instructorId ??
-    course.instructor_id ??
-    course.instructor ??
-    course.teacherId ??
-    course.teacher_id ??
-    null
-  )
 }
 
 async function loadStudentRecommendations() {
@@ -264,55 +268,21 @@ async function loadStudentRecommendations() {
 
 async function loadInstructorCourses() {
   try {
-    if (!auth.user) {
+    if (!auth.user?.id) {
       console.warn('[MyPage] instructor auth.user is missing')
       instructorError.value = '원료 정보를 불러오지 못했습니다.'
       return
     }
 
-    if (!auth.user.id) {
-      console.warn('[MyPage] instructor auth.user.id is missing:', auth.user)
-      instructorError.value = '원료 정보를 불러오지 못했습니다.'
-      return
-    }
+    // /courses/my 는 X-User-Id 로 본인 로트를 상태(PENDING 포함) 상관없이 전부 내려준다
+    const res = await courseApi.getMyCourses()
+    console.log('[MyPage] my courses response:', res.data)
 
-    const res = await courseApi.getCourses()
-    console.log('[MyPage] course list response:', res.data)
-
-    let courses = []
-
-    if (Array.isArray(res.data?.data)) {
-      courses = res.data.data
-    } else if (Array.isArray(res.data)) {
-      courses = res.data
-    } else {
-      console.warn('[MyPage] unexpected course response shape:', res.data)
-    }
-
-    console.log('[MyPage] auth.user =', auth.user)
-    console.log('[MyPage] courses =', courses)
-    console.log('[MyPage] first course =', courses[0])
-
-    courses.forEach(course => {
-      console.log('[MyPage] instructor fields check:', {
-        courseId: course.id,
-        instructorId: course.instructorId,
-        instructor_id: course.instructor_id,
-        instructor: course.instructor,
-        teacherId: course.teacherId,
-        teacher_id: course.teacher_id,
-        rawCourse: course
-      })
-    })
-
-    const instructorId = Number(auth.user.id)
-
-    myCourses.value = courses.filter(course => {
-      const courseInstructorId = Number(getCourseInstructorId(course))
-      return !Number.isNaN(courseInstructorId) && courseInstructorId === instructorId
-    })
-
-    console.log('[MyPage] filtered myCourses =', myCourses.value)
+    myCourses.value = Array.isArray(res.data?.data)
+      ? res.data.data
+      : Array.isArray(res.data)
+        ? res.data
+        : []
   } catch (error) {
     console.error('[MyPage] failed to load instructor courses:', error)
     instructorError.value = '현재 원료 정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'
@@ -450,26 +420,6 @@ onMounted(async () => {
   color: var(--color-text-secondary);
 }
 
-.badge {
-  display: inline-flex;
-  align-items: center;
-  width: fit-content;
-  padding: 6px 12px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.badge-blue {
-  background: #e8f1ff;
-  color: #2563eb;
-}
-
-.badge-amber {
-  background: #f7edd8;
-  color: #9a6700;
-}
-
 .section-head {
   display: flex;
   flex-direction: column;
@@ -566,7 +516,7 @@ onMounted(async () => {
 .summary-value {
   font-size: 28px;
   font-weight: 700;
-  color: var(--color-text-primary);
+  color: var(--color-brand-green-deep);
 }
 
 .instructor-course-list {
@@ -613,21 +563,36 @@ onMounted(async () => {
   font-weight: 600;
 }
 
-.status-active {
-  background: #eaf8ef;
-  color: #0f8a3b;
-}
-
-.status-inactive {
-  background: #f3f4f6;
-  color: #6b7280;
+.rejection-reason {
+  font-size: 13px;
+  color: var(--color-brand-error);
+  background: rgba(220, 38, 38, 0.08);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  width: fit-content;
+  margin-bottom: 18px;
 }
 
 .course-meta-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 12px;
   margin-bottom: 18px;
+}
+
+.component-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.component-chip {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-full);
+  padding: 4px 12px;
 }
 
 .meta-box {

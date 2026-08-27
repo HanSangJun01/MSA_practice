@@ -52,10 +52,9 @@
               </div>
               <div class="form-group">
                 <label class="form-label">역할</label>
-                <select v-model="registerForm.role" class="form-input">
-                  <option value="STUDENT">판매사</option>
-                  <option value="INSTRUCTOR">검증사</option>
-                  <option value="INSTRUCTOR">구매사</option>
+                <select v-model="registerForm.companyType" class="form-input">
+                  <option value="BUYER">구매기업</option>
+                  <option value="SUPPLIER">공급기업</option>
                 </select>
               </div>
               <div v-if="error" class="error-msg">{{ error }}</div>
@@ -89,7 +88,7 @@ const loading = ref(false)
 const error = ref('')
 const success = ref('')
 
-const registerForm = ref({ name: '', email: '', password: '', role: 'STUDENT' })
+const registerForm = ref({ name: '', email: '', password: '', companyType: 'BUYER' })
 
 const features = ['판매 산업 부산물 등록하기', '구매 희망 원료 매칭 받기', '원료 품질 검증 하기']
 
@@ -102,9 +101,10 @@ async function handleRegister() {
   success.value = ''
   loading.value = true
   try {
-    await authApi.register(registerForm.value)
+    const role = registerForm.value.companyType === 'SUPPLIER' ? 'INSTRUCTOR' : 'STUDENT'
+    await authApi.register({ ...registerForm.value, role })
     success.value = '회원가입 완료! 로그인 페이지로 이동합니다.'
-    registerForm.value = { name: '', email: '', password: '', role: 'STUDENT' }
+    registerForm.value = { name: '', email: '', password: '', companyType: 'BUYER' }
     setTimeout(() => {
       showRegister.value = false
       success.value = ''
@@ -130,7 +130,7 @@ async function handleRegister() {
   min-height: 100vh;
 }
 .login-left {
-  background: linear-gradient(160deg, #0B4A42 0%, #0F766E 50%, #14B8A6 100%);
+  background: linear-gradient(160deg, #06120F 0%, #0B2A24 42%, #0F6E56 100%);
   padding: 48px;
   display: flex;
   flex-direction: column;
@@ -146,7 +146,7 @@ async function handleRegister() {
 .brand-content p { font-size: 15px; color: rgba(255,255,255,0.75); margin-bottom: 28px; }
 .feature-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
 .feature-list li { display: flex; align-items: center; gap: 10px; font-size: 14px; color: rgba(255,255,255,0.85); }
-.dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.6); flex-shrink: 0; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--color-brand-green); flex-shrink: 0; }
 
 .login-right {
   display: flex;
@@ -204,18 +204,18 @@ async function handleRegister() {
 }
 .error-msg {
   padding: 10px 14px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: rgba(220, 38, 38, 0.08);
+  border: 1px solid rgba(220, 38, 38, 0.2);
   border-radius: var(--radius-md);
   font-size: 13px;
-  color: #dc2626;
+  color: var(--color-brand-error);
 }
 .success-msg {
   padding: 10px 14px;
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
+  background: var(--color-brand-green-soft);
+  border: 1px solid rgba(0, 212, 164, 0.3);
   border-radius: var(--radius-md);
   font-size: 13px;
-  color: #16a34a;
+  color: var(--color-brand-green-deep);
 }
 </style>

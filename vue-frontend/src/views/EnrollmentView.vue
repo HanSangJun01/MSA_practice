@@ -43,16 +43,21 @@
 
         <div v-else-if="enrollments.length" class="enrollment-list fade-in">
           <div v-for="item in enrollments" :key="item.id" class="enrollment-card">
-            <div class="enroll-thumb" :class="getThumbBg(item.course?.category)">
-              <img :src="getThumbSrc(item.course)" :alt="item.course?.title" />
+            <div class="enroll-thumb thumb-industrial">
+              <MaterialIcon :category="materialOf(item).category" class="thumb-icon" />
             </div>
 
             <div class="enroll-info">
-              <span class="badge" :class="getBadge(item.course?.category)">
-                {{ item.course?.category }}
+              <span class="badge badge-accent">
+                {{ getCategoryLabel(materialOf(item).category) }}
               </span>
-              <h3 class="enroll-title">{{ item.course?.title }}</h3>
-              <p class="enroll-instructor">공급기업: {{ item.course?.instructorName }}</p>
+              <h3 class="enroll-title">{{ materialOf(item).title }}</h3>
+              <p class="enroll-instructor">공급기업: {{ materialOf(item).supplierName }}</p>
+              <p class="enroll-price">
+                ₩{{ Number(materialOf(item).price ?? 0).toLocaleString() }}
+                <span v-if="materialOf(item).quantity">· 수량 {{ materialOf(item).quantity }}</span>
+                <span v-if="materialOf(item).region">· {{ materialOf(item).region }}</span>
+              </p>
             </div>
 
             <div class="enroll-status">
@@ -64,7 +69,7 @@
               >
                 {{ item.status === 'ACTIVE' ? '계약 완료' : '계약 대기' }}
               </span>
-              <router-link :to="`/courses/${item.courseId}`" class="btn btn-ghost btn-sm">
+              <router-link :to="`/courses/${item.materialLotId ?? item.courseId}`" class="btn btn-ghost btn-sm">
                 원료 보기
               </router-link>
             </div>
@@ -87,8 +92,23 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import AppHeader from '@/components/AppHeader.vue'
+import MaterialIcon from '@/components/MaterialIcon.vue'
 import { enrollmentApi } from '@/api/enrollment.js'
 import { useAuthStore } from '@/store/auth.js'
+import { getCategoryLabel } from '@/constants/category.js'
+
+// material 필드가 없으면 예전 course 필드로 폴백한다
+function materialOf(item) {
+  const m = item.material ?? item.course ?? {}
+  return {
+    category: m.category,
+    title: m.title,
+    supplierName: m.supplierName ?? m.instructorName,
+    price: m.price,
+    quantity: m.quantity,
+    region: m.region
+  }
+}
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -97,33 +117,6 @@ const enrollments = ref([])
 const loading = ref(true)
 
 const isInstructor = computed(() => auth.user?.role === 'INSTRUCTOR')
-
-const categoryConfig = {
-  '폐건전지': { bg: 'thumb-blue', badge: 'badge-blue', thumb: 'kubernetes' },
-  '폐수슬러지': { bg: 'thumb-gray', badge: 'badge-gray', thumb: 'docker' },
-  '제철슬래그': { bg: 'thumb-orange', badge: 'badge-orange', thumb: 'spring_boot' },
-  '폐합성수지': { bg: 'thumb-amber', badge: 'badge-amber', thumb: 'python' },
-  '스크랩금속': { bg: 'thumb-blue', badge: 'badge-blue', thumb: 'vue_js' },
-  '식품부산물': { bg: 'thumb-green', badge: 'badge-green', thumb: 'generative_ai' },
-}
-
-function getThumbBg(cat) {
-  return categoryConfig[cat]?.bg || 'thumb-gray'
-}
-
-function getBadge(cat) {
-  return categoryConfig[cat]?.badge || 'badge-gray'
-}
-
-function getThumbSrc(course) {
-  const key = course?.thumbnail || categoryConfig[course?.category]?.thumb
-  if (!key) return ''
-  try {
-    return new URL(`../assets/images/courses/${key}.png`, import.meta.url).href
-  } catch {
-    return ''
-  }
-}
 
 function handleLogout() {
   auth.logout()
@@ -260,41 +253,16 @@ onMounted(async () => {
 }
 
 .enroll-thumb {
-  width: 72px;
-  height: 72px;
+  width: 76px;
+  height: 76px;
   border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   flex-shrink: 0;
   overflow: hidden;
 }
 
-.enroll-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  padding: 8px;
-}
-
-.thumb-green {
-  background: var(--color-brand-green-soft);
-}
-
-.thumb-blue {
-  background: rgba(55, 114, 207, 0.12);
-}
-
-.thumb-orange {
-  background: rgba(242, 104, 60, 0.12);
-}
-
-.thumb-amber {
-  background: rgba(217, 119, 6, 0.12);
-}
-
-.thumb-gray {
-  background: var(--color-bg-tertiary);
+.thumb-icon {
+  width: 32px;
+  height: 32px;
 }
 
 .enroll-info {
@@ -305,13 +273,24 @@ onMounted(async () => {
 }
 
 .enroll-title {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
 }
 
 .enroll-instructor {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--color-text-secondary);
+}
+
+.enroll-price {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-brand-green-deep);
+}
+
+.enroll-price span {
+  font-weight: 400;
+  color: var(--color-text-muted);
 }
 
 .enroll-status {
