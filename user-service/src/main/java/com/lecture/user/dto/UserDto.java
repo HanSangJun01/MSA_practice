@@ -27,10 +27,14 @@ public class UserDto {
         @Size(min = 8, message = "비밀번호는 8자 이상이어야 합니다")
         private String password;
 
-        @NotBlank(message = "이름은 필수입니다")
+        @NotBlank(message = "기업명은 필수입니다")
         private String name;
 
         private User.Role role; // STUDENT or INSTRUCTOR
+
+        // BUYER | SUPPLIER | INTERMEDIARY
+        // 생략 시 role 로부터 유추한다 (STUDENT -> BUYER, INSTRUCTOR -> SUPPLIER)
+        private User.CompanyType companyType;
     }
 
     // 사용자 정보 응답
@@ -43,6 +47,7 @@ public class UserDto {
         private String email;
         private String name;
         private User.Role role;
+        private User.CompanyType companyType;
         private LocalDateTime createdAt;
 
         public static UserResponse from(User user) {
@@ -51,6 +56,7 @@ public class UserDto {
                     .email(user.getEmail())
                     .name(user.getName())
                     .role(user.getRole())
+                    .companyType(user.getCompanyType())
                     .createdAt(user.getCreatedAt())
                     .build();
         }

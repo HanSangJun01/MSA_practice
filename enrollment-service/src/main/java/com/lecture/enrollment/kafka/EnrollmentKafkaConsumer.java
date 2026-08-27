@@ -53,6 +53,8 @@ public class EnrollmentKafkaConsumer {
         } catch (Exception e) {
             log.error("[Kafka Consumer] 수강 활성화 실패 - event: {}, error: {}",
                     event, e.getMessage(), e);
+            // 정상 반환하면 Kafka 가 성공 처리로 판단하므로 예외를 전파해 재시도하게 한다.
+            throw new IllegalStateException("payment.completed 이벤트 처리 실패", e);
         }
     }
 }

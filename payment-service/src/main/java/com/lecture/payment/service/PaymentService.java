@@ -23,12 +23,13 @@ public class PaymentService {
     private final PaymentKafkaProducer kafkaProducer;
 
     /**
-     * 내부 결제 요청 (Enrollment Service → Payment Service REST 호출)
-     * 실습 환경에서는 PG 연동 없이 항상 성공으로 처리
+     * 내부 계약금 결제 요청 (Enrollment Service → Payment Service REST 호출)
+     * 실 PG 연동이 아니라 계약금 결제 시뮬레이션이며 항상 성공으로 처리한다
+     * amount 는 Enrollment Service 가 Course Service 에서 조회한 로트 총가격이다
      *
      * 처리 흐름:
      * 1. Payment 생성 (PENDING)
-     * 2. PG 결제 처리 (실습: UUID 트랜잭션 ID 발급으로 대체)
+     * 2. 결제 처리 (시뮬레이션: UUID 트랜잭션 ID 발급으로 대체)
      * 3. Payment 상태 → COMPLETED
      * 4. payment.completed 이벤트 발행 → Kafka
      */
@@ -36,7 +37,7 @@ public class PaymentService {
     public PaymentDto.InternalPaymentResult processInternalPayment(
             PaymentDto.InternalPaymentRequest request) {
 
-        log.info("[PaymentService] 결제 요청 - userId: {}, courseId: {}, amount: {}",
+        log.info("[PaymentService] 계약금 결제 요청 - 구매기업: {}, 판매 로트: {}, 로트 총가격: {}",
                 request.getUserId(), request.getCourseId(), request.getAmount());
 
         Payment payment = paymentRepository.save(
@@ -88,7 +89,7 @@ public class PaymentService {
     }
 
     /**
-     * 결제 단건 조회
+     * 계약금 결제 단건 조회
      */
     public PaymentDto.PaymentResponse getPayment(Long id) {
         Payment payment = paymentRepository.findById(id)
@@ -97,7 +98,7 @@ public class PaymentService {
     }
 
     /**
-     * 사용자 결제 내역 조회
+     * 기업 계약금 결제 내역 조회
      */
     public List<PaymentDto.PaymentResponse> getPaymentsByUser(Long userId) {
         return paymentRepository.findByUserId(userId).stream()

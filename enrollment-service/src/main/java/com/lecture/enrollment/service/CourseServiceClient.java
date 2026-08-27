@@ -104,6 +104,7 @@ public class CourseServiceClient {
         } catch (Exception e) {
             log.error("[CourseServiceClient] 수강생 수 증가 실패 - courseId: {}, error: {}",
                     courseId, e.getMessage());
+            throw new RuntimeException("Course Service 계약 완료 처리 실패: " + courseId, e);
         }
     }
 }

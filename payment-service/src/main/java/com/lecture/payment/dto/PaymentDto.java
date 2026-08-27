@@ -17,7 +17,7 @@ public class PaymentDto {
     @AllArgsConstructor
     @Builder
     public static class PaymentRequest {
-        @NotNull(message = "강의 ID는 필수입니다")
+        @NotNull(message = "판매 로트 ID는 필수입니다")
         private Long courseId;
 
         @NotNull(message = "금액은 필수입니다")
@@ -26,6 +26,8 @@ public class PaymentDto {
     }
 
     // 내부 서비스 결제 요청 (Enrollment Service → Payment Service)
+    // 내부 필드명 userId·courseId 는 기존 계약을 유지하고
+    // amount 는 Enrollment Service 가 조회한 로트 총가격을 그대로 받는다
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
@@ -36,15 +38,15 @@ public class PaymentDto {
         private BigDecimal amount;
     }
 
-    // 결제 응답
+    // 계약금 결제 응답 (외부)
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
     public static class PaymentResponse {
         private Long paymentId;
-        private Long userId;
-        private Long courseId;
+        private Long buyerId;
+        private Long materialLotId;
         private BigDecimal amount;
         private Payment.Status status;
         private String transactionId;
@@ -53,8 +55,8 @@ public class PaymentDto {
         public static PaymentResponse from(Payment payment) {
             return PaymentResponse.builder()
                     .paymentId(payment.getId())
-                    .userId(payment.getUserId())
-                    .courseId(payment.getCourseId())
+                    .buyerId(payment.getUserId())
+                    .materialLotId(payment.getCourseId())
                     .amount(payment.getAmount())
                     .status(payment.getStatus())
                     .transactionId(payment.getTransactionId())
