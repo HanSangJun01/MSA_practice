@@ -35,7 +35,7 @@
         <div class="course-grid">
           <div v-for="course in featuredCourses" :key="course.id" class="course-card-landing">
             <div class="card-thumb thumb-industrial">
-              <MaterialIcon :category="course.category" class="thumb-icon" />
+              <img :src="course.image" :alt="course.title" class="thumb-img" :style="{ objectPosition: course.imagePosition || 'center' }" />
             </div>
             <div class="card-body">
               <span class="badge badge-accent">{{ getCategoryLabel(course.category) }}</span>
@@ -88,16 +88,22 @@
 
 <script setup>
 import AppHeader from '@/components/AppHeader.vue'
-import MaterialIcon from '@/components/MaterialIcon.vue'
 import { getCategoryLabel } from '@/constants/category.js'
 
+import batteryImg from '@/assets/images/courses/battery.png'
+import chemicalImg from '@/assets/images/courses/chemical.png'
+import constructionImg from '@/assets/images/courses/construction.png'
+import plasticImg from '@/assets/images/courses/plastic.png'
+import metalImg from '@/assets/images/courses/metal.png'
+import electronicImg from '@/assets/images/courses/electronic.png'
+
 const featuredCourses = [
-  { id:1, title:'리튬이온 배터리 블랙매스', category:'BATTERY',     supplier:'리커버메탈',   price:'₩1,200,000' },
-  { id:2, title:'반도체 폐수슬러지 (CaF₂)', category:'CHEMICAL',    supplier:'케미리사이클', price:'협의' },
-  { id:3, title:'제철소 고로 슬래그',       category:'CONSTRUCTION',supplier:'스틸사이클',   price:'협의' },
-  { id:4, title:'폐합성수지 열분해유 원료', category:'PLASTIC',     supplier:'리사이클텍',   price:'₩620,000' },
-  { id:5, title:'구리 스크랩·동선',         category:'METAL',       supplier:'메탈리커버리', price:'₩1,050,000' },
-  { id:6, title:'폐가전 인쇄회로기판(PCB) 스크랩', category:'ELECTRONIC', supplier:'이웨이스트코리아', price:'₩450,000' },
+  { id:1, title:'리튬이온 배터리 블랙매스', category:'BATTERY',     supplier:'리커버메탈',   price:'₩1,200,000', image: batteryImg },
+  { id:2, title:'반도체 폐수슬러지 (CaF₂)', category:'CHEMICAL',    supplier:'케미리사이클', price:'협의', image: chemicalImg, imagePosition: 'center bottom' },
+  { id:3, title:'제철소 고로 슬래그',       category:'CONSTRUCTION',supplier:'스틸사이클',   price:'협의', image: constructionImg },
+  { id:4, title:'폐합성수지 열분해유 원료', category:'PLASTIC',     supplier:'리사이클텍',   price:'₩620,000', image: plasticImg },
+  { id:5, title:'구리 스크랩·동선',         category:'METAL',       supplier:'메탈리커버리', price:'₩1,050,000', image: metalImg },
+  { id:6, title:'폐가전 인쇄회로기판(PCB) 스크랩', category:'ELECTRONIC', supplier:'이웨이스트코리아', price:'₩450,000', image: electronicImg },
 ]
 
 const features = [
@@ -229,7 +235,7 @@ const features = [
   height: 150px;
   overflow: hidden;
 }
-.thumb-icon { width: 52px; height: 52px; }
+.thumb-img { width: 100%; height: 100%; object-fit: cover; }
 .card-body { padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 9px; }
 .card-title { font-size: 16px; font-weight: 600; color: var(--color-text-primary); line-height: 1.4; }
 .card-meta { display: flex; justify-content: space-between; align-items: center; }
