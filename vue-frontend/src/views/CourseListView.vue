@@ -12,7 +12,7 @@
             class="sidebar-item"
             :class="{ active: $route.path === '/courses' }"
           >
-            <span class="si-icon">🔩</span> 원료 목록
+            <span class="si-icon">🔩</span> 산업 부산물 목록
           </router-link>
 
           <router-link
@@ -46,7 +46,7 @@
       <main class="main-content">
         <div class="content-header">
           <div>
-            <h1 class="page-title">원료 목록</h1>
+            <h1 class="page-title">산업 부산물 목록</h1>
             <p class="page-subtitle" v-if="isSupplier">
               공급기업 계정으로 등록한 원료를 확인하고 새 원료를 추가할 수 있습니다.
             </p>
