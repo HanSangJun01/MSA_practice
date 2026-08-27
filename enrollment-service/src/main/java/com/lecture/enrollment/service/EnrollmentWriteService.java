@@ -21,6 +21,16 @@ public class EnrollmentWriteService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Enrollment createPendingEnrollment(Long userId, Long courseId) {
 
+        Enrollment existing = enrollmentRepository.findByUserIdAndCourseId(userId, courseId)
+                .orElse(null);
+
+        if (existing != null) {
+            existing.retry();
+            log.info("[EnrollmentWriteService] CANCELLED enrollment 재시도 - enrollmentId: {}, userId: {}, courseId: {}",
+                    existing.getId(), userId, courseId);
+            return existing;
+        }
+
         Enrollment enrollment = enrollmentRepository.save(
                 Enrollment.builder()
                         .userId(userId)
@@ -32,5 +42,18 @@ public class EnrollmentWriteService {
                 enrollment.getId(), userId, courseId);
 
         return enrollment;
+    }
+
+    /** 결제 요청이 실패하면 PENDING 계약을 취소해 다음 요청에서 재시도할 수 있게 한다. */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void cancelPendingEnrollment(Long userId, Long courseId) {
+        enrollmentRepository.findByUserIdAndCourseId(userId, courseId)
+                .ifPresent(enrollment -> {
+                    if (enrollment.getStatus() == Enrollment.Status.PENDING) {
+                        enrollment.cancel();
+                        log.warn("[EnrollmentWriteService] 결제 실패 계약 취소 - enrollmentId: {}, userId: {}, courseId: {}",
+                                enrollment.getId(), userId, courseId);
+                    }
+                });
     }
 }

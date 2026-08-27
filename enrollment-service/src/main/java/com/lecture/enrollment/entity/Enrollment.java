@@ -51,6 +51,16 @@ public class Enrollment {
     }
 
     public void cancel() {
-        this.status = Status.CANCELLED;
+        if (this.status == Status.PENDING) {
+            this.status = Status.CANCELLED;
+        }
+    }
+
+    /** 결제 실패 후 동일 계약을 다시 시도할 때 기존 행을 재사용한다. */
+    public void retry() {
+        if (this.status != Status.CANCELLED) {
+            throw new IllegalStateException("취소된 계약만 다시 시도할 수 있습니다. 현재 상태: " + this.status);
+        }
+        this.status = Status.PENDING;
     }
 }
