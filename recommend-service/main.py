@@ -49,7 +49,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Recommend Service",
-    description="온라인 강의 플랫폼 - 규칙 기반 강의 추천 서비스",
+    description="산업 부산물 순환거래 플랫폼 - 규칙 기반 로트 추천 서비스",
     version="0.0.1",
     lifespan=lifespan
 )

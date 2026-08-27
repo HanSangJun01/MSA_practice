@@ -169,18 +169,28 @@ public class CourseService {
 
     /**
      * 판매 로트 상세 조회
-     * - 승인된 로트만 노출한다. 비승인 로트는 존재 자체를 숨기기 위해 404 로 응답한다
+     * - 한 번이라도 공개된 로트(APPROVED, SOLD)만 노출한다.
+     *   그 외(PENDING, REJECTED, WITHDRAWN)는 존재 자체를 숨기기 위해 404 로 응답한다
+     * - SOLD 를 포함하는 이유: APPROVED 시절 이미 공개됐던 로트이고,
+     *   막아두면 구매기업이 자기가 계약한 로트를 상세 조회할 수 없다.
+     *   course-service 는 계약 정보를 모르므로 구매자 여부를 직접 판별할 수 없다
      * - 공급기업 본인은 자기 로트를 상태와 무관하게 조회할 수 있다 (requesterId 는 선택)
      */
     public CourseDto.MaterialLotResponse getCourse(Long id, Long requesterId) {
         Course course = findCourseById(id);
 
         boolean owner = requesterId != null && requesterId.equals(course.getInstructorId());
-        if (!owner && course.getStatus() != Course.Status.APPROVED) {
+        if (!owner && !isPubliclyVisible(course)) {
             throw new NotFoundException("판매 로트를 찾을 수 없습니다: " + id);
         }
 
         return CourseDto.MaterialLotResponse.from(course);
+    }
+
+    /** 상세 조회로 공개할 수 있는 상태인지 - 목록·추천 후보는 여전히 APPROVED 만 대상이다 */
+    private boolean isPubliclyVisible(Course course) {
+        return course.getStatus() == Course.Status.APPROVED
+                || course.getStatus() == Course.Status.SOLD;
     }
 
     /**
