@@ -11,7 +11,7 @@
           </router-link>
 
           <router-link
-            v-if="!isInstructor"
+            v-if="!isSupplier"
             to="/enrollments"
             class="sidebar-item"
           >
@@ -38,14 +38,14 @@
           <div class="profile-info">
             <h2 class="profile-name">{{ auth.user?.name || '사용자' }}</h2>
             <p class="profile-email">{{ auth.user?.email || '-' }}</p>
-            <span class="badge" :class="isInstructor ? 'badge-amber' : 'badge-blue'">
-              {{ isInstructor ? '공급기업' : '구매기업' }}
+            <span class="badge" :class="companyTypeBadgeClass">
+              {{ companyTypeLabel }}
             </span>
           </div>
         </div>
 
-        <!-- 구매기업 화면 -->
-        <section v-if="!isInstructor" class="recommend-section">
+        <!-- 구매기업/중간기업 화면 -->
+        <section v-if="!isSupplier" class="recommend-section">
           <h3 class="section-title">추천 원료</h3>
 
           <p v-if="recommendMessage" class="recommend-message">
@@ -194,7 +194,13 @@ import { getLotStatusLabel, getLotStatusBadge } from '@/constants/lotStatus.js'
 const router = useRouter()
 const auth = useAuthStore()
 
-const isInstructor = computed(() => auth.user?.role === 'INSTRUCTOR')
+// role(INSTRUCTOR)은 공급기업/중간기업이 공유하므로 companyType으로 공급기업만 구분한다
+const isSupplier = computed(() => auth.user?.companyType === 'SUPPLIER')
+
+const COMPANY_TYPE_LABELS = { BUYER: '구매기업', SUPPLIER: '공급기업', INTERMEDIARY: '중간기업' }
+const COMPANY_TYPE_BADGES = { BUYER: 'badge-blue', SUPPLIER: 'badge-amber', INTERMEDIARY: 'badge-tag' }
+const companyTypeLabel = computed(() => COMPANY_TYPE_LABELS[auth.user?.companyType] || '구매기업')
+const companyTypeBadgeClass = computed(() => COMPANY_TYPE_BADGES[auth.user?.companyType] || 'badge-blue')
 
 /* 학생용 */
 const recommendations = ref([])
@@ -292,7 +298,7 @@ async function loadInstructorCourses() {
 }
 
 onMounted(async () => {
-  if (isInstructor.value) {
+  if (isSupplier.value) {
     recommendLoading.value = false
     await loadInstructorCourses()
   } else {

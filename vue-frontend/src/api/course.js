@@ -17,6 +17,14 @@ export const courseApi = {
     return api.get('/api/courses/my')
   },
 
+  getPendingApprovals() {
+    return api.get('/api/courses/approval/pending')
+  },
+
+  decideApproval(id, payload) {
+    return api.patch(`/api/courses/${id}/approval`, payload)
+  },
+
   create(data) {
     return api.post('/api/courses', data)
   },

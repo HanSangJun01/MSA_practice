@@ -70,7 +70,8 @@ router.beforeEach((to) => {
     return { name: 'CourseList' }
   }
 
-  if (to.meta.instructorOnly && auth.user?.role !== 'INSTRUCTOR') {
+  // role(INSTRUCTOR)은 공급기업/중간기업이 공유하므로 companyType으로 공급기업만 허용한다
+  if (to.meta.instructorOnly && auth.user?.companyType !== 'SUPPLIER') {
     return { name: 'CourseList' }
   }
 })

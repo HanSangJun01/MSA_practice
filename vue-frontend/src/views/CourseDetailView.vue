@@ -52,11 +52,31 @@
                 :disabled="buttonDisabled"
                 :class="{ 'btn-disabled': buttonDisabled }"
               >
-                <span v-if="enrolling">처리 중...</span>
+                <span v-if="enrolling || deciding">처리 중...</span>
                 <span v-else>{{ buttonLabel }}</span>
               </button>
 
-              <div v-if="enrollError" class="error-msg">{{ enrollError }}</div>
+              <div v-if="isIntermediary && course.status === 'PENDING'" class="reject-block">
+                <button v-if="!showRejectForm" class="text-btn-reject" @click="showRejectForm = true">
+                  거절하기
+                </button>
+                <div v-else class="reject-form">
+                  <textarea
+                    v-model="rejectReason"
+                    class="reject-textarea"
+                    rows="3"
+                    placeholder="거절 사유를 입력하세요"
+                  ></textarea>
+                  <div class="reject-actions">
+                    <button class="btn btn-ghost btn-sm" @click="showRejectForm = false">취소</button>
+                    <button class="btn btn-sm reject-confirm-btn" :disabled="deciding" @click="handleReject">
+                      거절 확정
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div v-if="enrollError || decisionError" class="error-msg">{{ enrollError || decisionError }}</div>
 
               <p class="helper-text" v-if="helperText">
                 {{ helperText }}
@@ -90,6 +110,7 @@ import AppHeader from '@/components/AppHeader.vue'
 import MaterialIcon from '@/components/MaterialIcon.vue'
 import { useCourseStore } from '@/store/course.js'
 import { enrollmentApi } from '@/api/enrollment.js'
+import { courseApi } from '@/api/course.js'
 import { useAuthStore } from '@/store/auth.js'
 import { getCategoryLabel } from '@/constants/category.js'
 import { getComponentLabel } from '@/constants/materialComponent.js'
@@ -104,9 +125,16 @@ const enrolling = ref(false)
 const enrollError = ref('')
 const enrollmentStatus = ref('NONE') // NONE | PENDING | ACTIVE
 
+const deciding = ref(false)
+const decisionError = ref('')
+const showRejectForm = ref(false)
+const rejectReason = ref('')
+
 const course = computed(() => courseStore.selectedCourse)
 const loading = computed(() => courseStore.loading)
-const isInstructor = computed(() => auth.user?.role === 'INSTRUCTOR')
+// role(INSTRUCTOR)은 공급기업/중간기업이 공유하므로 companyType으로 구분한다
+const isSupplier = computed(() => auth.user?.companyType === 'SUPPLIER')
+const isIntermediary = computed(() => auth.user?.companyType === 'INTERMEDIARY')
 
 const displayCategory = computed(() => getCategoryLabel(course.value?.category) || '-')
 
@@ -148,22 +176,32 @@ const displayPrice = computed(() => {
 })
 
 const buttonLabel = computed(() => {
-  if (isInstructor.value) return '공급기업 계정은 구매 신청 불가'
+  if (isSupplier.value) return '공급기업 계정은 구매 신청 불가'
+  if (isIntermediary.value) {
+    return course.value?.status === 'PENDING' ? '승인하기' : '검토 완료된 원료'
+  }
   if (enrollmentStatus.value === 'ACTIVE') return '내 구매 목록으로 이동'
   if (enrollmentStatus.value === 'PENDING') return '신청 완료 · 계약 처리 중'
   return '계약하고 구매하기'
 })
 
 const buttonDisabled = computed(() => {
-  if (enrolling.value) return true
-  if (isInstructor.value) return true
+  if (enrolling.value || deciding.value) return true
+  if (isSupplier.value) return true
+  if (isIntermediary.value) return course.value?.status !== 'PENDING'
   if (enrollmentStatus.value === 'PENDING') return true
   return false
 })
 
 const helperText = computed(() => {
-  if (isInstructor.value) {
+  if (isSupplier.value) {
     return '공급기업 계정은 본인이 등록한 원료를 구매 신청할 수 없습니다.'
+  }
+
+  if (isIntermediary.value) {
+    return course.value?.status === 'PENDING'
+      ? '성분표와 함량을 확인한 뒤 승인 또는 거절을 결정해 주세요.'
+      : '이미 검토가 완료된 원료입니다.'
   }
 
   if (enrollmentStatus.value === 'ACTIVE') {
@@ -178,7 +216,7 @@ const helperText = computed(() => {
 })
 
 async function loadEnrollmentStatus() {
-  if (!auth.user?.id || !course.value?.id || isInstructor.value) {
+  if (!auth.user?.id || !course.value?.id || isSupplier.value || isIntermediary.value) {
     enrollmentStatus.value = 'NONE'
     return
   }
@@ -211,14 +249,31 @@ async function loadEnrollmentStatus() {
 
 async function handlePrimaryAction() {
   enrollError.value = ''
+  decisionError.value = ''
 
   if (!course.value?.id) {
     enrollError.value = '원료 정보가 올바르지 않습니다.'
     return
   }
 
-  if (isInstructor.value) {
+  if (isSupplier.value) {
     enrollError.value = '공급기업 계정은 본인이 등록한 원료를 구매 신청할 수 없습니다.'
+    return
+  }
+
+  if (isIntermediary.value) {
+    if (course.value.status !== 'PENDING') return
+
+    deciding.value = true
+    try {
+      await courseApi.decideApproval(course.value.id, { decision: 'APPROVED' })
+      router.push('/courses')
+    } catch (e) {
+      console.error('[CourseDetail] approval failed:', e)
+      decisionError.value = e.response?.data?.message || '승인 처리에 실패했습니다.'
+    } finally {
+      deciding.value = false
+    }
     return
   }
 
@@ -244,8 +299,53 @@ async function handlePrimaryAction() {
   }
 }
 
+async function handleReject() {
+  if (!course.value?.id) return
+
+  decisionError.value = ''
+  if (!rejectReason.value.trim()) {
+    decisionError.value = '거절 사유를 입력해 주세요.'
+    return
+  }
+
+  deciding.value = true
+  try {
+    await courseApi.decideApproval(course.value.id, {
+      decision: 'REJECTED',
+      rejectionReason: rejectReason.value.trim()
+    })
+    router.push('/courses')
+  } catch (e) {
+    console.error('[CourseDetail] rejection failed:', e)
+    decisionError.value = e.response?.data?.message || '거절 처리에 실패했습니다.'
+  } finally {
+    deciding.value = false
+  }
+}
+
+// 중간기업은 소유자가 아니어도 승인 대기 목록을 통해서만 타사 로트를 조회할 수 있다
+// (GET /courses/{id} 는 본인 소유 로트가 아니면 APPROVED 상태만 노출한다)
+async function loadCourseForReview(id) {
+  courseStore.loading = true
+  try {
+    const res = await courseApi.getPendingApprovals()
+    const list = Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : []
+    const found = list.find(c => Number(c.id) === Number(id))
+    courseStore.selectedCourse = found ? courseStore.normalizeCourse(found) : null
+  } catch (e) {
+    console.error('[CourseDetail] failed to load course for review:', e)
+    courseStore.selectedCourse = null
+  } finally {
+    courseStore.loading = false
+  }
+}
+
 onMounted(async () => {
-  await courseStore.fetchCourse(route.params.id)
+  if (isIntermediary.value) {
+    await loadCourseForReview(route.params.id)
+  } else {
+    await courseStore.fetchCourse(route.params.id)
+  }
   console.log('[CourseDetail] selectedCourse =', courseStore.selectedCourse)
   await loadEnrollmentStatus()
 })
@@ -398,6 +498,65 @@ watch(
   padding: 8px 12px;
   background: rgba(220, 38, 38, 0.08);
   border-radius: var(--radius-sm);
+}
+
+.reject-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.text-btn-reject {
+  align-self: center;
+  background: none;
+  border: none;
+  color: var(--color-brand-error);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 4px;
+  text-decoration: underline;
+}
+
+.reject-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reject-textarea {
+  padding: 10px 12px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-family: var(--font-sans);
+  color: var(--color-text-primary);
+  background: var(--color-bg-primary);
+  resize: vertical;
+  outline: none;
+}
+
+.reject-textarea:focus {
+  border-color: var(--color-brand-error);
+}
+
+.reject-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.reject-confirm-btn {
+  background: var(--color-brand-error);
+  color: #fff;
+}
+
+.reject-confirm-btn:hover {
+  opacity: 0.9;
+}
+
+.reject-confirm-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .helper-text {

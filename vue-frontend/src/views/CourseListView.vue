@@ -16,7 +16,7 @@
           </router-link>
 
           <router-link
-            v-if="!isInstructor"
+            v-if="!isSupplier"
             to="/enrollments"
             class="sidebar-item"
           >
@@ -47,13 +47,16 @@
         <div class="content-header">
           <div>
             <h1 class="page-title">원료 목록</h1>
-            <p class="page-subtitle" v-if="isInstructor">
+            <p class="page-subtitle" v-if="isSupplier">
               공급기업 계정으로 등록한 원료를 확인하고 새 원료를 추가할 수 있습니다.
+            </p>
+            <p class="page-subtitle" v-else-if="isIntermediary">
+              검토 대기 중인 원료를 확인하고 승인 여부를 결정할 수 있습니다.
             </p>
           </div>
 
           <router-link
-            v-if="isInstructor"
+            v-if="isSupplier"
             to="/courses/new"
             class="btn btn-primary create-course-btn"
           >
@@ -96,10 +99,11 @@
 
         <!-- 빈 상태 -->
         <div v-else class="empty-state">
-          <p>해당 카테고리의 원료가 없습니다.</p>
+          <p v-if="isIntermediary">검토 대기 중인 원료가 없습니다.</p>
+          <p v-else>해당 카테고리의 원료가 없습니다.</p>
 
           <router-link
-            v-if="isInstructor"
+            v-if="isSupplier"
             to="/courses/new"
             class="btn btn-primary empty-action-btn"
           >
@@ -118,6 +122,7 @@ import AppHeader from '@/components/AppHeader.vue'
 import CourseCard from '@/components/CourseCard.vue'
 import { useCourseStore } from '@/store/course.js'
 import { useAuthStore } from '@/store/auth.js'
+import { courseApi } from '@/api/course.js'
 
 const router = useRouter()
 const courseStore = useCourseStore()
@@ -126,7 +131,9 @@ const auth = useAuthStore()
 const { categories, loading } = courseStore
 
 const selectedCategory = computed(() => courseStore.selectedCategory)
-const isInstructor = computed(() => auth.user?.role === 'INSTRUCTOR')
+// role(INSTRUCTOR)은 공급기업/중간기업이 공유하므로 companyType으로 구분한다
+const isSupplier = computed(() => auth.user?.companyType === 'SUPPLIER')
+const isIntermediary = computed(() => auth.user?.companyType === 'INTERMEDIARY')
 
 const filteredCourses = computed(() => {
   if (!Array.isArray(courseStore.courses)) return []
@@ -143,8 +150,40 @@ function handleLogout() {
   router.push('/')
 }
 
+// 중간기업은 승인 대기 로트만, 공급기업은 공개 목록 + 본인 로트(상태 무관)를 함께 본다
+async function loadForRole() {
+  if (isIntermediary.value) {
+    courseStore.loading = true
+    try {
+      const res = await courseApi.getPendingApprovals()
+      const list = Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : []
+      courseStore.courses = list.map(courseStore.normalizeCourse)
+    } catch (e) {
+      console.error('[CourseList] failed to load pending approvals:', e)
+      courseStore.courses = []
+    } finally {
+      courseStore.loading = false
+    }
+    return
+  }
+
+  await courseStore.fetchCourses()
+
+  if (isSupplier.value) {
+    try {
+      const res = await courseApi.getMyCourses()
+      const mine = Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : []
+      const existingIds = new Set(courseStore.courses.map(c => c.id))
+      const onlyNew = mine.map(courseStore.normalizeCourse).filter(c => !existingIds.has(c.id))
+      courseStore.courses = [...courseStore.courses, ...onlyNew]
+    } catch (e) {
+      console.error('[CourseList] failed to merge my courses:', e)
+    }
+  }
+}
+
 onMounted(() => {
-  courseStore.fetchCourses()
+  loadForRole()
 })
 </script>
 

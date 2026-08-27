@@ -232,7 +232,7 @@ function handleLogout() {
 function validateForm() {
   validationError.value = ''
 
-  if (!auth.user || auth.user.role !== 'INSTRUCTOR') {
+  if (!auth.user || auth.user.companyType !== 'SUPPLIER') {
     validationError.value = '공급기업 계정만 원료를 등록할 수 있습니다.'
     return false
   }

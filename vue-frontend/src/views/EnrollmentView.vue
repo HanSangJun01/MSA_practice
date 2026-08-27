@@ -11,7 +11,7 @@
           </router-link>
 
           <router-link
-            v-if="!isInstructor"
+            v-if="!isSupplier"
             to="/enrollments"
             class="sidebar-item active"
           >
@@ -116,7 +116,8 @@ const auth = useAuthStore()
 const enrollments = ref([])
 const loading = ref(true)
 
-const isInstructor = computed(() => auth.user?.role === 'INSTRUCTOR')
+// role(INSTRUCTOR)은 공급기업/중간기업이 공유하므로 companyType으로 공급기업만 구분한다
+const isSupplier = computed(() => auth.user?.companyType === 'SUPPLIER')
 
 function handleLogout() {
   auth.logout()
@@ -125,8 +126,8 @@ function handleLogout() {
 
 onMounted(async () => {
   // 공급기업은 이 페이지 접근 불가 → 마이페이지로 이동
-  if (isInstructor.value) {
-    console.warn('[EnrollmentView] instructor tried to access /enrollments, redirect to /mypage')
+  if (isSupplier.value) {
+    console.warn('[EnrollmentView] supplier tried to access /enrollments, redirect to /mypage')
     router.replace('/mypage')
     return
   }

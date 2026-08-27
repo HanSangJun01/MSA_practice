@@ -7,7 +7,12 @@
 
     <!-- 내용 -->
     <div class="card-body">
-      <span class="badge badge-accent">{{ categoryLabel }}</span>
+      <div class="badge-row">
+        <span class="badge badge-accent">{{ categoryLabel }}</span>
+        <span v-if="course.status && course.status !== 'APPROVED'" class="badge" :class="statusBadgeClass">
+          {{ statusLabel }}
+        </span>
+      </div>
       <h3 class="card-title">{{ course.title }}</h3>
       <div class="card-meta">
         <span class="instructor">{{ course.supplierName ?? course.instructorName }}</span>
@@ -24,12 +29,15 @@
 import { computed } from 'vue'
 import MaterialIcon from '@/components/MaterialIcon.vue'
 import { getCategoryLabel } from '@/constants/category.js'
+import { getLotStatusLabel, getLotStatusBadge } from '@/constants/lotStatus.js'
 
 const props = defineProps({
   course: { type: Object, required: true }
 })
 
 const categoryLabel = computed(() => getCategoryLabel(props.course.category))
+const statusLabel = computed(() => getLotStatusLabel(props.course.status))
+const statusBadgeClass = computed(() => getLotStatusBadge(props.course.status))
 </script>
 
 <style scoped>
@@ -61,6 +69,10 @@ const categoryLabel = computed(() => getCategoryLabel(props.course.category))
   flex-direction: column;
   gap: 9px;
   flex: 1;
+}
+.badge-row {
+  display: flex;
+  gap: 6px;
 }
 .card-title {
   font-size: 17px;

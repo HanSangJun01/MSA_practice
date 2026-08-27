@@ -55,6 +55,7 @@
                 <select v-model="registerForm.companyType" class="form-input">
                   <option value="BUYER">구매기업</option>
                   <option value="SUPPLIER">공급기업</option>
+                  <option value="INTERMEDIARY">중간기업</option>
                 </select>
               </div>
               <div v-if="error" class="error-msg">{{ error }}</div>
@@ -101,7 +102,8 @@ async function handleRegister() {
   success.value = ''
   loading.value = true
   try {
-    const role = registerForm.value.companyType === 'SUPPLIER' ? 'INSTRUCTOR' : 'STUDENT'
+    // 백엔드는 STUDENT+BUYER, INSTRUCTOR+SUPPLIER, INSTRUCTOR+INTERMEDIARY 조합만 허용한다
+    const role = registerForm.value.companyType === 'BUYER' ? 'STUDENT' : 'INSTRUCTOR'
     await authApi.register({ ...registerForm.value, role })
     success.value = '회원가입 완료! 로그인 페이지로 이동합니다.'
     registerForm.value = { name: '', email: '', password: '', companyType: 'BUYER' }
