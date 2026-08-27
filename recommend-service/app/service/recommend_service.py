@@ -145,7 +145,8 @@ class RecommendService:
         """
         logger.info(f"[RecommendService] 신규 구매기업 추천 - userId: {user_id}")
 
-        all_lots = await course_client.get_all_lots()
+        # category 생략 시 APPROVED 전체를 반환한다
+        all_lots = await course_client.get_recommend_lots()
         popular = sorted(
             all_lots,
             key=lambda lot: lot.enrollmentCount,

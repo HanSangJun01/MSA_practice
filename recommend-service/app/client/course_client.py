@@ -26,6 +26,9 @@ class CourseServiceClient:
 
         구매된 로트는 즉시 SOLD로 전환되어 애초에 후보에 없으므로
         excludeIds 파라미터는 사용하지 않는다.
+
+        외부 GET /api/courses 는 같은 로트를 supplierId/contractCount 라는
+        다른 필드명으로 내려주므로 추천 서비스에서는 사용하지 않는다.
         """
         url = f"{self.base_url}/api/courses/internal/recommend"
         params = {}
@@ -39,23 +42,6 @@ class CourseServiceClient:
                 return [MaterialLotResponse(**lot) for lot in response.json()]
         except Exception as e:
             logger.error(f"[CourseClient] 추천 로트 조회 실패 - category: {category}, error: {e}")
-            return []
-
-    async def get_all_lots(self) -> List[MaterialLotResponse]:
-        """
-        GET /courses - 판매 가능(APPROVED) 로트 전체 조회
-        구매 이력이 없는 신규 구매기업 추천용
-        """
-        url = f"{self.base_url}/api/courses"
-        try:
-            async with httpx.AsyncClient(timeout=5.0) as client:
-                response = await client.get(url)
-                response.raise_for_status()
-                data = response.json()
-                lots = data.get("data", [])
-                return [MaterialLotResponse(**lot) for lot in lots]
-        except Exception as e:
-            logger.error(f"[CourseClient] 전체 로트 조회 실패 - error: {e}")
             return []
 
 
