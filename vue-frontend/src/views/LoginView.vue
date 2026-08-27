@@ -4,12 +4,12 @@
       <!-- 좌측 브랜딩 -->
       <div class="login-left">
         <div class="brand">
-          <img src="@/assets/images/logo/main_logo.png" alt="Elemento" class="brand-logo" />
+          <img src="@/assets/images/logo/elemento_logo.png" alt="LearnNexus" class="brand-logo" />
           <span class="brand-name">Elemento</span>
         </div>
         <div class="brand-content">
-          <h2>다시 만나서<br>반갑습니다</h2>
-          <p>로그인하고 우리 기업에 맞는 순환원료를 찾아보세요.</p>
+          <h2>다시 만나서 반갑습니다</h2>
+          <p>로그인하고 산업 부산물 거래를 시작해보세요.</p>
           <ul class="feature-list">
             <li v-for="f in features" :key="f">
               <span class="dot"></span>{{ f }}
@@ -53,8 +53,9 @@
               <div class="form-group">
                 <label class="form-label">역할</label>
                 <select v-model="registerForm.role" class="form-input">
-                  <option value="STUDENT">구매기업</option>
-                  <option value="INSTRUCTOR">공급기업</option>
+                  <option value="STUDENT">판매사</option>
+                  <option value="INSTRUCTOR">검증사</option>
+                  <option value="INSTRUCTOR">구매사</option>
                 </select>
               </div>
               <div v-if="error" class="error-msg">{{ error }}</div>
@@ -90,7 +91,7 @@ const success = ref('')
 
 const registerForm = ref({ name: '', email: '', password: '', role: 'STUDENT' })
 
-const features = ['등록한 원료·구매 이력 관리', 'AI 성분 매칭 추천', '품질 검증 성적서 확인']
+const features = ['판매 산업 부산물 등록하기', '구매 희망 원료 매칭 받기', '원료 품질 검증 하기']
 
 function handleOAuth() {
   auth.redirectToLogin()
@@ -136,7 +137,7 @@ async function handleRegister() {
   gap: 48px;
 }
 .brand { display: flex; align-items: center; gap: 10px; }
-.brand-logo { width: 40px; height: 40px; border-radius: 10px; object-fit: contain; }
+.brand-logo { width: 56px; height: 56px; border-radius: 10px; object-fit: contain; }
 .brand-name { font-size: 18px; font-weight: 700; color: #fff; }
 .brand-content h2 {
   font-size: 32px; font-weight: 700; color: #fff;

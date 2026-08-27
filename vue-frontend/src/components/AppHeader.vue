@@ -3,8 +3,8 @@
     <div class="header-inner">
       <!-- 로고 -->
       <router-link to="/" class="logo">
-        <img src="@/assets/images/logo/main_logo.png" alt="Elemento" class="logo-img" />
-        <span class="logo-text">Elemento</span>
+        <img src="@/assets/images/logo/elemento_logo.png" alt="LearnNexus" class="logo-img" />
+        <span class="logo-text">LearnNexus</span>
       </router-link>
 
       <!-- 네비게이션 -->

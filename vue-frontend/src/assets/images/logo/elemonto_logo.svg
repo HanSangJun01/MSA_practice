@@ -1,0 +1,39 @@
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="100%" height="100%">
+    <defs>
+        <!-- 배경에 들어갈 세련된 다크 사이버 네이비 그라데이션 -->
+        <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#0b1d28" />
+        <stop offset="100%" stop-color="#050e14" />
+        </linearGradient>
+    </defs>
+
+    <!-- 배경 사각형 -->
+    <rect width="800" height="400" fill="url(#bgGrad)" />
+
+    <g transform="translate(0, 20)">
+        <!-- 메인 브랜드명: 미래지향적인 산세리프 텍스트 룩 -->
+        <text x="140" y="210" 
+            font-family="Arial, Helvetica, sans-serif" 
+            font-size="96" 
+            font-weight="normal" 
+            fill="#a9c7d3" 
+            letter-spacing="2">e-lement</text>
+
+        <!-- 알파벳 'o' 자리에 들어갈 네온 바이오 그린 자원 순환 화살표 아이콘 -->
+        <g transform="translate(595, 175) scale(1.1)">
+        <!-- 상단 순환 화살표 패스 -->
+        <path d="M -5 -35 A 36 36 0 0 1 35 5 L 47 -2 L 33 25 L 6 15 L 18 8 A 20 20 0 0 0 -5 -19 Z" fill="#52ff26" />
+        <!-- 하단 순환 화살표 패스 -->
+        <path d="M 5 35 A 36 36 0 0 1 -35 -5 L -47 2 L -33 -25 L -6 -15 L -18 -8 A 20 20 0 0 0 5 19 Z" fill="#52ff26" />
+        </g>
+
+        <!-- 서브타이틀: 플랫폼의 역할을 명확히 짚어주는 문구 -->
+        <text x="400" y="275" 
+            text-anchor="middle" 
+            font-family="Arial, Helvetica, sans-serif" 
+            font-size="20" 
+            font-weight="300" 
+            fill="#6d8a96" 
+            letter-spacing="6">ELEMENTAL MATCHING PLATFORM</text>
+    </g>
+    </svg>
